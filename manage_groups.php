@@ -1,36 +1,66 @@
 <?php
 session_start();
-// error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Establish database connection
-$conn = mysqli_connect('localhost', 'root', '', 'user_db');
-header("Location: view_group.php");
-// Check the connection
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
+include 'config.php';
 
-// Fetch groups from the database
-$sql = "SELECT * FROM groups";
-$result = mysqli_query($conn, $sql);
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Check if all required fields are set
+    if (isset($_POST['member_name']) && isset($_POST['admin_id'])) {
+        // Sanitize and validate input data (you may want to add more validation)
+        $member_name = mysqli_real_escape_string($conn, $_POST['member_name']);
+        $admin_id = mysqli_real_escape_string($conn, $_POST['admin_id']);
 
-// Initialize an array to store groups
-$groups = [];
+        // Check if group_id is set in the form
+        if (isset($_POST['group_id'])) {
+            $group_id = mysqli_real_escape_string($conn, $_POST['group_id']);
 
-// Check if there are any groups
-if (mysqli_num_rows($result) > 0) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $groups[] = $row;
+            // Start a transaction to ensure atomicity
+            mysqli_autocommit($conn, false);
+
+            // Check if the group_id exists in the groups table
+            $check_group_sql = "SELECT * FROM groups WHERE group_id = '$group_id' FOR UPDATE";
+            $result = mysqli_query($conn, $check_group_sql);
+
+            if (mysqli_num_rows($result) == 0) {
+                // Group doesn't exist, insert it first
+                $insert_group_sql = "INSERT INTO groups (group_id) VALUES ('$group_id')";
+
+                if (!mysqli_query($conn, $insert_group_sql)) {
+                    mysqli_rollback($conn);
+                    echo "Error inserting group: " . mysqli_error($conn);
+                    exit;
+                }
+            }
+
+            // Commit the transaction
+            mysqli_commit($conn);
+
+            // Insert the member into the database with group_id
+            $insert_sql = "INSERT INTO group_members (group_id, member_name, user_id, created_at) VALUES ('$group_id', '$member_name', '$admin_id', current_timestamp())";
+        } else {
+            // Insert the member into the database without specifying group_id
+            $insert_sql = "INSERT INTO group_members (member_name, user_id, created_at) VALUES ('$member_name', '$admin_id', current_timestamp())";
+        }
+
+        if (mysqli_query($conn, $insert_sql)) {
+            echo "Member added successfully.";
+        } else {
+            echo "Error: " . $insert_sql . "<br>" . mysqli_error($conn);
+        }
+    } else {
+        echo "All fields are required.";
     }
 }
 
-// Close the result set
-mysqli_free_result($result);
-
-// Close the database connection
-mysqli_close($conn);
+// ... Rest of your existing code
 ?>
+
+
+
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -60,16 +90,17 @@ mysqli_close($conn);
                             <li>
                             <form method="POST" action="manage_groups.php">
  <!-- Corrected form action -->
-                                    <label for="group_id">Select Group:</label>
+                                     <!-- <label for="group_id">Select Group:</label>
                                     <select id="group_id" name="group_id" required>
                                         <?php foreach ($groups as $group) : ?>
                                             <option value="<?php echo $group['group_id']; ?>"><?php echo $group['group_name']; ?></option>
                                         <?php endforeach; ?>
-                                    </select>
+                                    </select>  -->
                                     <label for="member_name">Member Name:</label>
                                     <input type="text" id="member_name" name="member_name" required>
                                     <input type="hidden" name="admin_id" value="<?php echo $_SESSION['admin_id']; ?>"> <!-- Add hidden input for admin_id -->
                                     <button type="submit">Add Member</button>
+                                    
                                 </form>
 
                             </li>

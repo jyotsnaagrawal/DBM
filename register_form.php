@@ -93,7 +93,7 @@ if (isset($_POST['submit'])) {
       <input type="password" name="password" required placeholder="Enter your password" autocomplete="new-password">
       <input type="password" name="cpassword" required placeholder="Confirm your password" autocomplete="new-password">
       <select name="user_type" autocomplete="user-type">
-         <option value="user">User</option>
+        
          <option value="admin">Admin</option>
          
       </select>

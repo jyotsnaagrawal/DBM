@@ -1,4 +1,81 @@
-<?php
+
+    <!DOCTYPE html>
+    <html lang="en">
+
+    <head>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>View Group - <?php echo htmlspecialchars($group['group_name']); ?></title>
+        <link rel="stylesheet" href="view_group.css"> <!-- Link to your custom CSS file -->
+
+    </head>
+
+    <body>
+        <header>
+            <h1>Expense Tracker</h1>
+        </header>
+
+        <div class="container">
+            <div class="content">
+                <h1>View Group - <?php echo htmlspecialchars($group['group_name']); ?></h1>
+
+                <div class="group-details">
+                    <h2>Group Details</h2>
+                    <table>
+                        <tr>
+                            <th>Group Name</th>
+                            <td><?php echo htmlspecialchars($group['group_name']); ?></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="expenses">
+                    <h2>Expenses</h2>
+                    <?php if (!empty($expenses)) : ?>
+                        <table>
+                            <!-- ... (your existing code to display expenses) ... -->
+                        </table>
+                    <?php else : ?>
+                        <p>No expenses found for this group.</p>
+                    <?php endif; ?>
+
+                    <!-- Display the add expense form always -->
+                    <form method="POST" action="view_group.php?group_id=<?php echo $groupId; ?>">
+                        <label for="expense_name">Expense Name:</label>
+                        <input type="text" id="expense_name" name="expense_name" required>
+
+                        <label for="amount">Amount:</label>
+                        <input type="number" id="amount" name="amount" step="0.01" required>
+
+                        <label for="date">Date:</label>
+                        <input type="date" id="date" name="date" required>
+
+                        <label for="paid_by">Paid By:</label>
+                        <select id="paid_by" name="paid_by" required>
+                            <?php foreach ($members as $member) : ?>
+                                <option value='<?php echo $member['user_id']; ?>'><?php echo htmlspecialchars($member['member_name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <label for="owe_to">Owe To:</label>
+                        <select id="owe_to" name="owe_to" required>
+                            <?php foreach ($members as $member) : ?>
+                                <option value='<?php echo $member['user_id']; ?>'><?php echo htmlspecialchars($member['member_name']); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <button type="submit" name="add_expense">Add Expense</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </body>
+
+    </html>
+
+    <?php
 session_start();
 var_dump($_SESSION);
 
@@ -8,14 +85,14 @@ include 'config.php';
 
 
 // Check if the user is logged in
-$userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+// $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 
-if (!$userId) {
-    // Redirect or handle the case when the user is not logged in
-    //header("Location: view_group.php"); // Change to your actual login page
-    header('location:login_form.php');
-    exit();
-}
+// if (!$userId) {
+//     // Redirect or handle the case when the user is not logged in
+//     //header("Location: view_group.php"); // Change to your actual login page
+//     header('location:login_form.php');
+//     exit();
+// }
 
 
 // Fetch all group IDs
@@ -213,87 +290,6 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
     }
 
 ?>
-
-
-
-
-    <!DOCTYPE html>
-    <html lang="en">
-
-    <head>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>View Group - <?php echo htmlspecialchars($group['group_name']); ?></title>
-        <link rel="stylesheet" href="view_group.css"> <!-- Link to your custom CSS file -->
-
-    </head>
-
-    <body>
-        <header>
-            <h1>Expense Tracker</h1>
-        </header>
-
-        <div class="container">
-            <div class="content">
-                <h1>View Group - <?php echo htmlspecialchars($group['group_name']); ?></h1>
-
-                <div class="group-details">
-                    <h2>Group Details</h2>
-                    <table>
-                        <tr>
-                            <th>Group Name</th>
-                            <td><?php echo htmlspecialchars($group['group_name']); ?></td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div class="expenses">
-                    <h2>Expenses</h2>
-                    <?php if (!empty($expenses)) : ?>
-                        <table>
-                            <!-- ... (your existing code to display expenses) ... -->
-                        </table>
-                    <?php else : ?>
-                        <p>No expenses found for this group.</p>
-                    <?php endif; ?>
-
-                    <!-- Display the add expense form always -->
-                    <form method="POST" action="view_group.php?group_id=<?php echo $groupId; ?>">
-                        <label for="expense_name">Expense Name:</label>
-                        <input type="text" id="expense_name" name="expense_name" required>
-
-                        <label for="amount">Amount:</label>
-                        <input type="number" id="amount" name="amount" step="0.01" required>
-
-                        <label for="date">Date:</label>
-                        <input type="date" id="date" name="date" required>
-
-                        <label for="paid_by">Paid By:</label>
-                        <select id="paid_by" name="paid_by" required>
-                            <?php foreach ($members as $member) : ?>
-                                <option value='<?php echo $member['user_id']; ?>'><?php echo htmlspecialchars($member['member_name']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-
-                        <label for="owe_to">Owe To:</label>
-                        <select id="owe_to" name="owe_to" required>
-                            <?php foreach ($members as $member) : ?>
-                                <option value='<?php echo $member['user_id']; ?>'><?php echo htmlspecialchars($member['member_name']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-
-                        <button type="submit" name="add_expense">Add Expense</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </body>
-
-    </html>
-
-
 
     <script>
         // Add your custom JavaScript for interactive features
