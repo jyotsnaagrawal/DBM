@@ -2,9 +2,9 @@
 session_start();
 ini_set('display_errors', 1);
 
-// Establish database connection
 include 'config.php';
 
+// Check if the form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Check if all required fields are set
     if (isset($_POST['member_name']) && isset($_POST['admin_id'])) {
@@ -12,41 +12,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $member_name = mysqli_real_escape_string($conn, $_POST['member_name']);
         $admin_id = mysqli_real_escape_string($conn, $_POST['admin_id']);
 
-        // Check if group_id is set in the form
-        if (isset($_POST['group_id'])) {
-            $group_id = mysqli_real_escape_string($conn, $_POST['group_id']);
+        // ... Perform the insertion into the database (similar to your previous code) ...
 
-            // Start a transaction to ensure atomicity
-            mysqli_autocommit($conn, false);
-
-            // Check if the group_id exists in the groups table
-            $check_group_sql = "SELECT * FROM groups WHERE group_id = '$group_id' FOR UPDATE";
-            $result = mysqli_query($conn, $check_group_sql);
-
-            if (mysqli_num_rows($result) == 0) {
-                // Group doesn't exist, insert it first
-                $insert_group_sql = "INSERT INTO groups (group_id) VALUES ('$group_id')";
-
-                if (!mysqli_query($conn, $insert_group_sql)) {
-                    mysqli_rollback($conn);
-                    echo "Error inserting group: " . mysqli_error($conn);
-                    exit;
-                }
-            }
-
-            // Commit the transaction
-            mysqli_commit($conn);
-
-            // Insert the member into the database with group_id
-            $insert_sql = "INSERT INTO group_members (group_id, member_name, user_id, created_at) VALUES ('$group_id', '$member_name', '$admin_id', current_timestamp())";
-        } else {
-            // Insert the member into the database without specifying group_id
-            $insert_sql = "INSERT INTO group_members (member_name, user_id, created_at) VALUES ('$member_name', '$admin_id', current_timestamp())";
-        }
+        // For example, assuming there's a table named 'group_members'
+        $insert_sql = "INSERT INTO group_members (member_name, user_id, created_at) VALUES ('$member_name', '$admin_id', current_timestamp())";
 
         if (mysqli_query($conn, $insert_sql)) {
             echo "Member added successfully.";
         } else {
+            // If the query fails, display an error message
             echo "Error: " . $insert_sql . "<br>" . mysqli_error($conn);
         }
     } else {
@@ -54,11 +28,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 }
 
-// ... Rest of your existing code
+// Query to retrieve groups from the database
+$query = "SELECT * FROM groups";
+$result = mysqli_query($conn, $query);
+
+// Fetch groups into an array
+$groups = mysqli_fetch_all($result, MYSQLI_ASSOC);
 ?>
 
-
-
+<!-- The rest of your HTML code -->
 
 
 
@@ -83,26 +61,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="content">
             <h1>Manage Groups</h1>
 
+            <form method="POST" action="manage_groups.php">
+                <label for="member_name">Member Name:</label>
+                <input type="text" id="member_name" name="member_name" required>
+                <input type="hidden" name="admin_id" value="<?php echo $_SESSION['admin_id']; ?>">
+                <button type="submit">Add Member</button>
+            </form>
+
             <div class="group-list">
                 <?php if (!empty($groups)) : ?>
                     <ul>
                         <?php foreach ($groups as $group) : ?>
                             <li>
-                            <form method="POST" action="manage_groups.php">
- <!-- Corrected form action -->
-                                     <!-- <label for="group_id">Select Group:</label>
-                                    <select id="group_id" name="group_id" required>
-                                        <?php foreach ($groups as $group) : ?>
-                                            <option value="<?php echo $group['group_id']; ?>"><?php echo $group['group_name']; ?></option>
-                                        <?php endforeach; ?>
-                                    </select>  -->
-                                    <label for="member_name">Member Name:</label>
-                                    <input type="text" id="member_name" name="member_name" required>
-                                    <input type="hidden" name="admin_id" value="<?php echo $_SESSION['admin_id']; ?>"> <!-- Add hidden input for admin_id -->
-                                    <button type="submit">Add Member</button>
-                                    
-                                </form>
-
+                                <!-- Display group information here -->
                             </li>
                         <?php endforeach; ?>
                     </ul>
@@ -110,13 +81,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <p>No groups found.</p>
                 <?php endif; ?>
             </div>
+
             <div class="group-buttons">
                 <button class="create-group-btn" onclick="createGroup()">Create Group</button>
             </div>
         </div>
     </div>
-
-    <!-- Add your other HTML content here -->
 
     <script>
         function createGroup() {
