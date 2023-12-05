@@ -1,44 +1,16 @@
 <?php
 session_start();
-ini_set('display_errors', 1);
-
 include 'config.php';
 
-// Check if the form is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Check if all required fields are set
-    if (isset($_POST['member_name']) && isset($_POST['admin_id'])) {
-        // Sanitize and validate input data (you may want to add more validation)
-        $member_name = mysqli_real_escape_string($conn, $_POST['member_name']);
-        $admin_id = mysqli_real_escape_string($conn, $_POST['admin_id']);
-
-        // ... Perform the insertion into the database (similar to your previous code) ...
-
-        // For example, assuming there's a table named 'group_members'
-        $insert_sql = "INSERT INTO group_members (member_name, user_id, created_at) VALUES ('$member_name', '$admin_id', current_timestamp())";
-
-        if (mysqli_query($conn, $insert_sql)) {
-            echo "Member added successfully.";
-        } else {
-            // If the query fails, display an error message
-            echo "Error: " . $insert_sql . "<br>" . mysqli_error($conn);
-        }
-    } else {
-        echo "All fields are required.";
-    }
+if (!isset($_SESSION['admin_name'])) {
+    header('Location: login_form.php');
+    exit();
 }
 
-// Query to retrieve groups from the database
 $query = "SELECT * FROM groups";
 $result = mysqli_query($conn, $query);
-
-// Fetch groups into an array
 $groups = mysqli_fetch_all($result, MYSQLI_ASSOC);
 ?>
-
-<!-- The rest of your HTML code -->
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -61,13 +33,6 @@ $groups = mysqli_fetch_all($result, MYSQLI_ASSOC);
         <div class="content">
             <h1>Manage Groups</h1>
 
-            <form method="POST" action="manage_groups.php">
-                <label for="member_name">Member Name:</label>
-                <input type="text" id="member_name" name="member_name" required>
-                <input type="hidden" name="admin_id" value="<?php echo $_SESSION['admin_id']; ?>">
-                <button type="submit">Add Member</button>
-            </form>
-
             <div class="group-list">
                 <?php if (!empty($groups)) : ?>
                     <ul>
@@ -83,10 +48,10 @@ $groups = mysqli_fetch_all($result, MYSQLI_ASSOC);
             </div>
 
             <div class="group-buttons">
-    <button class="create-group-btn" onclick="createGroup()">Create Group</button>
-    <button class="view-page-btn" onclick="viewPage()">View Page</button>
-</div>
-
+                <button class="create-group-btn" onclick="createGroup()">Create Group</button>
+                <button class="view-page-btn" onclick="viewPage()">View Page</button>
+                <button class="view-page-btn" onclick="addMember()">Add Member</button>
+            </div>
         </div>
     </div>
 
@@ -96,6 +61,9 @@ $groups = mysqli_fetch_all($result, MYSQLI_ASSOC);
         }
         function viewPage() {
             window.location.href = 'view_group.php';
+        }
+        function addMember() {
+            window.location.href = 'add_members.php';
         }
     </script>
 </body>
