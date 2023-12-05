@@ -50,7 +50,8 @@ form {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 20px; /* Added margin-top for separation */
+    margin-top: 20px;
+    /* Added margin-top for separation */
 }
 
 input[type="text"] {
@@ -78,7 +79,8 @@ button:hover {
 .group-buttons {
     margin-top: 20px;
     display: flex;
-    gap: 10px; /* Adjust the gap value based on your preference */
+    gap: 10px;
+    /* Adjust the gap value based on your preference */
 }
 
 button.create-group-btn {
@@ -101,11 +103,11 @@ button.view-page-buttons {
     border-radius: 5px;
     cursor: pointer;
     transition: background 0.3s ease;
-    margin-left: 10px; /* Adjust the margin value based on your preference */
+    margin-left: 10px;
+    /* Adjust the margin value based on your preference */
 }
 
 button.create-group-btn:hover,
 button.view-page-buttons:hover {
     background: crimson;
 }
-

@@ -334,7 +334,8 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
             padding: 0;
             font-family: 'Poppins', sans-serif;
             background: #f2f2f2;
-            overflow-x: hidden; /* Prevent horizontal scrollbar */
+            overflow-x: hidden;
+            /* Prevent horizontal scrollbar */
         }
 
         header {
@@ -363,12 +364,14 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
             padding: 20px;
         }
 
-        h1, h2 {
+        h1,
+        h2 {
             color: #333;
             animation: fadeIn 1s ease-out;
         }
 
-        .group-details, .expenses {
+        .group-details,
+        .expenses {
             margin-top: 20px;
             animation: fadeInLeft 1s ease-out;
         }
@@ -379,7 +382,8 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
             margin-top: 10px;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
@@ -398,7 +402,10 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
             animation: fadeInRight 1s ease-out;
         }
 
-        input[type="text"], input[type="number"], input[type="date"], select {
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select {
             padding: 8px;
             margin: 8px 0;
             border: 1px solid #ccc;
@@ -427,6 +434,7 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
                 opacity: 0;
                 transform: translateY(-20px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -438,6 +446,7 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
                 opacity: 0;
                 transform: translateY(-40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -449,6 +458,7 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
                 opacity: 0;
                 transform: translateY(40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -460,6 +470,7 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
                 opacity: 0;
                 transform: translateX(-40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -471,6 +482,7 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
                 opacity: 0;
                 transform: translateX(40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -556,6 +568,3 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
 </body>
 
 </html>
-
-
-   
