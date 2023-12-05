@@ -1,81 +1,4 @@
-
-    <!DOCTYPE html>
-    <html lang="en">
-
-    <head>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-        <meta charset="UTF-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>View Group - <?php echo htmlspecialchars($group['group_name']); ?></title>
-        <link rel="stylesheet" href="view_group.css"> <!-- Link to your custom CSS file -->
-
-    </head>
-
-    <body>
-        <header>
-            <h1>Expense Tracker</h1>
-        </header>
-
-        <div class="container">
-            <div class="content">
-                <h1>View Group - <?php echo htmlspecialchars($group['group_name']); ?></h1>
-
-                <div class="group-details">
-                    <h2>Group Details</h2>
-                    <table>
-                        <tr>
-                            <th>Group Name</th>
-                            <td><?php echo htmlspecialchars($group['group_name']); ?></td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div class="expenses">
-                    <h2>Expenses</h2>
-                    <?php if (!empty($expenses)) : ?>
-                        <table>
-                            <!-- ... (your existing code to display expenses) ... -->
-                        </table>
-                    <?php else : ?>
-                        <p>No expenses found for this group.</p>
-                    <?php endif; ?>
-
-                    <!-- Display the add expense form always -->
-                    <form method="POST" action="view_group.php?group_id=<?php echo $groupId; ?>">
-                        <label for="expense_name">Expense Name:</label>
-                        <input type="text" id="expense_name" name="expense_name" required>
-
-                        <label for="amount">Amount:</label>
-                        <input type="number" id="amount" name="amount" step="0.01" required>
-
-                        <label for="date">Date:</label>
-                        <input type="date" id="date" name="date" required>
-
-                        <label for="paid_by">Paid By:</label>
-                        <select id="paid_by" name="paid_by" required>
-                            <?php foreach ($members as $member) : ?>
-                                <option value='<?php echo $member['user_id']; ?>'><?php echo htmlspecialchars($member['member_name']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-
-                        <label for="owe_to">Owe To:</label>
-                        <select id="owe_to" name="owe_to" required>
-                            <?php foreach ($members as $member) : ?>
-                                <option value='<?php echo $member['user_id']; ?>'><?php echo htmlspecialchars($member['member_name']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-
-                        <button type="submit" name="add_expense">Add Expense</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </body>
-
-    </html>
-
-    <?php
+<?php
 session_start();
 var_dump($_SESSION);
 
@@ -394,3 +317,245 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
     }
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Group - <?php echo htmlspecialchars($group['group_name']); ?></title>
+    <link rel="stylesheet" href="view_group.css"> <!-- Link to your custom CSS file -->
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f2f2f2;
+            overflow-x: hidden; /* Prevent horizontal scrollbar */
+        }
+
+        header {
+            background: #333;
+            padding: 15px 20px;
+            color: white;
+            text-align: center;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .content {
+            text-align: center;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            color: #333;
+            animation: fadeIn 1s ease-out;
+        }
+
+        .group-details, .expenses {
+            margin-top: 20px;
+            animation: fadeInLeft 1s ease-out;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            margin-top: 20px;
+            animation: fadeInRight 1s ease-out;
+        }
+
+        input[type="text"], input[type="number"], input[type="date"], select {
+            padding: 8px;
+            margin: 8px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: crimson;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Expense Tracker</h1>
+    </header>
+
+    <div class="container">
+        <div class="content">
+            <h1>View Group - <?php echo htmlspecialchars($group['group_name']); ?></h1>
+
+            <div class="group-details">
+                <h2>Group Details</h2>
+                <table>
+                    <tr>
+                        <th>Group Name</th>
+                        <td><?php echo htmlspecialchars($group['group_name']); ?></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="expenses">
+                <h2>Expenses</h2>
+                <?php if (!empty($expenses)) : ?>
+                    <table>
+                        <!-- ... (your existing code to display expenses) ... -->
+                    </table>
+                <?php else : ?>
+                    <p>No expenses found for this group.</p>
+                <?php endif; ?>
+
+                <!-- Display the add expense form always -->
+                <form method="POST" action="view_group.php?group_id=<?php echo $groupId; ?>">
+                    <label for="expense_name">Expense Name:</label>
+                    <input type="text" id="expense_name" name="expense_name" required>
+
+                    <label for="amount">Amount:</label>
+                    <input type="number" id="amount" name="amount" step="0.01" required>
+
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" name="date" required>
+
+                    <label for="paid_by">Paid By:</label>
+                    <select id="paid_by" name="paid_by" required>
+                        <?php foreach ($members as $member) : ?>
+                            <option value='<?php echo $member['user_id']; ?>'><?php echo htmlspecialchars($member['member_name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+
+                    <label for="owe_to">Owe To:</label>
+                    <select id="owe_to" name="owe_to" required>
+                        <?php foreach ($members as $member) : ?>
+                            <option value='<?php echo $member['user_id']; ?>'><?php echo htmlspecialchars($member['member_name']); ?></option>
+                        <?php endforeach; ?>
+                    </select>
+
+                    <button type="submit" name="add_expense">Add Expense</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add your custom JavaScript for interactive features
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelector('form').addEventListener('submit', function() {
+                var paidBySelect = document.getElementById('paid_by');
+                var oweToSelect = document.getElementById('owe_to');
+
+                var paidById = paidBySelect.options[paidBySelect.selectedIndex].value;
+                var oweToId = oweToSelect.options[oweToSelect.selectedIndex].value;
+
+                alert('Paid By ID: ' + paidById + ', Owe To ID: ' + oweToId);
+            });
+        });
+    </script>
+</body>
+
+</html>
+
+
+   

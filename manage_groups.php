@@ -83,14 +83,19 @@ $groups = mysqli_fetch_all($result, MYSQLI_ASSOC);
             </div>
 
             <div class="group-buttons">
-                <button class="create-group-btn" onclick="createGroup()">Create Group</button>
-            </div>
+    <button class="create-group-btn" onclick="createGroup()">Create Group</button>
+    <button class="view-page-btn" onclick="viewPage()">View Page</button>
+</div>
+
         </div>
     </div>
 
     <script>
         function createGroup() {
             window.location.href = 'create_group.php';
+        }
+        function viewPage() {
+            window.location.href = 'view_group.php';
         }
     </script>
 </body>
