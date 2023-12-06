@@ -1,44 +1,38 @@
 <?php
 session_start();
+error_reporting(E_ALL);
 ini_set('display_errors', 1);
+var_dump($_SESSION); //  for debugging to see the current state of the session variables.
 
-include 'config.php';
+// Establish database connection
+$conn = mysqli_connect('localhost', 'root', '', 'user_db');
 
-// Check if the form is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Check if all required fields are set
-    if (isset($_POST['member_name']) && isset($_POST['admin_id'])) {
-        // Sanitize and validate input data (you may want to add more validation)
-        $member_name = mysqli_real_escape_string($conn, $_POST['member_name']);
-        $admin_id = mysqli_real_escape_string($conn, $_POST['admin_id']);
+// Check the connection
+if (!$conn) {
+    die("Connection failed: " . mysqli_connect_error());
+}
 
-        // ... Perform the insertion into the database (similar to your previous code) ...
+// Fetch groups from the database
+$sql = "SELECT * FROM groups";
+$result = mysqli_query($conn, $sql);
 
-        // For example, assuming there's a table named 'group_members'
-        $insert_sql = "INSERT INTO group_members (member_name, user_id, created_at) VALUES ('$member_name', '$admin_id', current_timestamp())";
+// Initialize an array to store groups
+$groups = [];
 
-        if (mysqli_query($conn, $insert_sql)) {
-            echo "Member added successfully.";
-        } else {
-            // If the query fails, display an error message
-            echo "Error: " . $insert_sql . "<br>" . mysqli_error($conn);
-        }
-    } else {
-        echo "All fields are required.";
+// Check if there are any groups
+if (mysqli_num_rows($result) > 0) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $groups[] = $row;
     }
 }
 
-// Query to retrieve groups from the database
-$query = "SELECT * FROM groups";
-$result = mysqli_query($conn, $query);
+// Close the result set
+mysqli_free_result($result);
 
-// Fetch groups into an array
-$groups = mysqli_fetch_all($result, MYSQLI_ASSOC);
+// Close the database connection
+mysqli_close($conn);
+
 ?>
-
-<!-- The rest of your HTML code -->
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -61,19 +55,22 @@ $groups = mysqli_fetch_all($result, MYSQLI_ASSOC);
         <div class="content">
             <h1>Manage Groups</h1>
 
-            <form method="POST" action="manage_groups.php">
-                <label for="member_name">Member Name:</label>
-                <input type="text" id="member_name" name="member_name" required>
-                <input type="hidden" name="admin_id" value="<?php echo $_SESSION['admin_id']; ?>">
-                <button type="submit">Add Member</button>
-            </form>
-
             <div class="group-list">
                 <?php if (!empty($groups)) : ?>
                     <ul>
                         <?php foreach ($groups as $group) : ?>
                             <li>
-                                <!-- Display group information here -->
+                                <form method="POST" action="add_members.php">
+                                    <input type="hidden" name="group_id" value="<?php echo $group['group_id']; ?>">
+
+                                    <!-- Remove the input label for member names -->
+                                    
+                                    <!-- You can add more input fields as needed -->
+
+                                    <button type="submit" name="view_group" class="group-btn">
+                                        <?php echo htmlspecialchars($group['group_name']); ?>
+                                    </button>
+                                </form>
                             </li>
                         <?php endforeach; ?>
                     </ul>
@@ -84,19 +81,15 @@ $groups = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
             <div class="group-buttons">
                 <button class="create-group-btn" onclick="createGroup()">Create Group</button>
-                <button class="view-page-btn" onclick="viewPage()">View Page</button>
             </div>
-
         </div>
     </div>
+
+    <!-- Add your other HTML content here -->
 
     <script>
         function createGroup() {
             window.location.href = 'create_group.php';
-        }
-
-        function viewPage() {
-            window.location.href = 'view_group.php';
         }
     </script>
 </body>

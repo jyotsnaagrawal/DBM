@@ -1,37 +1,54 @@
 <?php
+// Include the configuration file
+include 'config.php';
+// Initialize the $error array to store error messages
+$error = [];
 
-@include 'config.php';
-
-if(isset($_POST['submit'])){
-
-   $name = mysqli_real_escape_string($conn, $_POST['name']);
-   $email = mysqli_real_escape_string($conn, $_POST['email']);
-   $pass = md5($_POST['password']);
-   $cpass = md5($_POST['cpassword']);
-   $user_type = $_POST['user_type'];
-
-   $select = " SELECT * FROM user_form WHERE email = '$email' && password = '$pass' ";
-
-   $result = mysqli_query($conn, $select);
-
-   if(mysqli_num_rows($result) > 0){
-
-      $error[] = 'user already exist!';
-
-   }else{
-
-      if($pass != $cpass){
-         $error[] = 'password not matched!';
-      }else{
-         $insert = "INSERT INTO user_form(name, email, password, user_type) VALUES('$name','$email','$pass','$user_type')";
-         mysqli_query($conn, $insert);
-         header('location:login_form.php');
-      }
-   }
-
-};
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 
+
+// Check if the registration form is submitted
+if (isset($_POST['submit'])) {
+    // Sanitize user input
+    $name = mysqli_real_escape_string($conn, $_POST['name']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $password = $_POST['password'];
+    $cpassword = $_POST['cpassword'];
+    $user_type = $_POST['user_type'];
+
+    // Check if the user already exists in the database
+    $selectQuery = "SELECT * FROM user_form WHERE email = ?";
+    $stmt = mysqli_prepare($conn, $selectQuery);
+    mysqli_stmt_bind_param($stmt, "s", $email);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+
+    // Check if the user already exists and the password matches
+    if ($row = mysqli_fetch_assoc($result) && password_verify($password, $row['password'])) {
+        $error[] = 'User already exists!';
+    } else {
+        // Check if passwords match
+        if ($password != $cpassword) {
+            $error[] = 'Passwords do not match!';
+        } else {
+            // Hash the password
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+            // Insert new user into the database
+            $insertQuery = "INSERT INTO user_form(name, email, password, user_type) VALUES(?, ?, ?, ?)";
+            $stmt = mysqli_prepare($conn, $insertQuery);
+            mysqli_stmt_bind_param($stmt, "ssss", $name, $email, $hashedPassword, $user_type);
+            mysqli_stmt_execute($stmt);
+
+            // Redirect to login page after successful registration
+            header('location: login_form.php');
+            exit;
+        }
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -40,76 +57,50 @@ if(isset($_POST['submit'])){
    <meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>register form</title>
+   <title>Register Form</title>
 
-   <!-- custom css file link  -->
+   <!-- Custom CSS file link  -->
    <link rel="stylesheet" href="css/style.css">
-
 </head>
 <body>
-   
-<div class="form-container">
+<header>
 
+    <nav>
+        <div class="logo">
+            <!-- Add your logo image or text here -->
+            <img src="css/images/logo.png" alt="Logo">
+        </div>
+        <ul class="nav-links">
+            <li><a href="login_form.php">Login</a></li>
+           
+        </ul>
+    </nav>
+</header>
+
+<div class="form-container">
    <form action="" method="post">
-      <h3>register now</h3>
+      <h3>Register Now</h3>
       <?php
+      // Display errors if any
       if(isset($error)){
          foreach($error as $error){
             echo '<span class="error-msg">'.$error.'</span>';
          };
       };
       ?>
-      <input type="text" name="name" required placeholder="enter your name">
-      <input type="email" name="email" required placeholder="enter your email">
-      <input type="password" name="password" required placeholder="enter your password">
-      <input type="password" name="cpassword" required placeholder="confirm your password">
-      <select name="user_type">
-         <option value="user">user</option>
-         <option value="admin">admin</option>
+      <input type="text" name="name" required placeholder="Enter your name" autocomplete="name">
+      <input type="email" name="email" required placeholder="Enter your email" autocomplete="email">
+      <input type="password" name="password" required placeholder="Enter your password" autocomplete="new-password">
+      <input type="password" name="cpassword" required placeholder="Confirm your password" autocomplete="new-password">
+      <select name="user_type" autocomplete="user-type">
+         <option value="user">User</option>
+         <option value="admin">Admin</option>
+         
       </select>
-      <input type="submit" name="submit" value="register now" class="form-btn">
-      <p>already have an account? <a href="login_form.php">login now</a></p>
+      <input type="submit" name="submit" value="Register Now" class="form-btn">
+      <p>Already have an account? <a href="login_form.php">Login now</a></p>
    </form>
-
 </div>
 
-<!-- Code injected by live-server -->
-<script>
-	// <![CDATA[  <-- For SVG support
-	if ('WebSocket' in window) {
-		(function () {
-			function refreshCSS() {
-				var sheets = [].slice.call(document.getElementsByTagName("link"));
-				var head = document.getElementsByTagName("head")[0];
-				for (var i = 0; i < sheets.length; ++i) {
-					var elem = sheets[i];
-					var parent = elem.parentElement || head;
-					parent.removeChild(elem);
-					var rel = elem.rel;
-					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
-						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
-						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
-					}
-					parent.appendChild(elem);
-				}
-			}
-			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-			var address = protocol + window.location.host + window.location.pathname + '/ws';
-			var socket = new WebSocket(address);
-			socket.onmessage = function (msg) {
-				if (msg.data == 'reload') window.location.reload();
-				else if (msg.data == 'refreshcss') refreshCSS();
-			};
-			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
-				console.log('Live reload enabled.');
-				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
-			}
-		})();
-	}
-	else {
-		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
-	}
-	// ]]>
-</script>
 </body>
 </html>

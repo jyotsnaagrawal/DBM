@@ -1,22 +1,12 @@
 <?php
-session_start();
-var_dump($_SESSION);
 
+session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 include 'config.php';
 
-
-// Check if the user is logged in
-// $userId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
-
-// if (!$userId) {
-//     // Redirect or handle the case when the user is not logged in
-//     //header("Location: view_group.php"); // Change to your actual login page
-//     header('location:login_form.php');
-//     exit();
-// }
-
+// Initialize variables
+$userId = $_SESSION['user_id'];
 
 // Fetch all group IDs
 $getAllGroupsQuery = "SELECT group_id FROM groups";
@@ -28,37 +18,28 @@ $allGroupsResult = mysqli_stmt_get_result($stmtAllGroups);
 while ($row = mysqli_fetch_assoc($allGroupsResult)) {
     // Initialize variables
     $groupId = $row['group_id'];
+    $members = [];
+    $group = [];
 
     // Fetch members for the group
-    $getMembersQuery = "SELECT user_id, member_name FROM group_members WHERE group_id = ?";
-
+    $getMembersQuery = "SELECT * FROM group_members WHERE group_id = ?";
     $stmtMembers = mysqli_prepare($conn, $getMembersQuery);
+    mysqli_stmt_bind_param($stmtMembers, "i", $groupId);
+    mysqli_stmt_execute($stmtMembers);
+    $membersResult = mysqli_stmt_get_result($stmtMembers);
 
     if (!$stmtMembers) {
         die("Error in SQL query preparation: " . mysqli_error($conn));
     }
 
-    mysqli_stmt_bind_param($stmtMembers, "i", $groupId);
-    mysqli_stmt_execute($stmtMembers);
-    $membersResult = mysqli_stmt_get_result($stmtMembers);
-
-    if (!$membersResult) {
-        die("Error in fetching results: " . mysqli_error($conn));
-    }
-
     // Fetch members and store them in an array
     $members = mysqli_fetch_all($membersResult, MYSQLI_ASSOC);
 
+    // Free the result set
+    mysqli_free_result($membersResult);
+
     // Close the statement
     mysqli_stmt_close($stmtMembers);
-
-    // Display group information
-    echo "<p>Group Members for Group ID {$groupId}:</p>";
-    echo "<ul>";
-    foreach ($members as $member) {
-        echo "<li>{$member['member_name']}</li>";
-    }
-    echo "</ul>";
 
     // Fetch group details
     $getGroupQuery = "SELECT * FROM groups WHERE group_id = ?";
@@ -80,14 +61,23 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
     // Close the statement
     mysqli_stmt_close($stmtGroup);
 
-    // Display group details
+    // Display group information
+    echo "<p>Group Members for Group ID {$groupId}:</p>";
+    echo "<ul>";
+    foreach ($members as $member) {
+        echo "<li>{$member['member_name']}</li>";
+    }
+    echo "</ul>";
+    echo "<hr>";
+
     echo "<p>Group Details for Group ID {$groupId}:</p>";
     echo "<hr>";
     echo "<table>";
+    echo "<hr>";
     echo "<tr><th>Group Name</th></tr>";
+    echo "<hr>";
     echo "<tr><td>" . (isset($group['group_name']) ? htmlspecialchars($group['group_name']) : 'N/A') . "</td></tr>";
     echo "</table>";
-    echo "<hr>";
 
     // Display individual expenses for the admin user
     if ($_SESSION['admin_name'] === 'Admin User') {
@@ -112,6 +102,24 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
         mysqli_free_result($adminExpensesResult);
         mysqli_stmt_close($stmtAdminExpenses);
     }
+
+    // Fetch members for the group
+    $getMembersQuery = "SELECT * FROM group_members WHERE group_id = ?";
+    $stmtMembers = mysqli_prepare($conn, $getMembersQuery);
+    mysqli_stmt_bind_param($stmtMembers, "i", $groupId);
+
+    if (!$stmtMembers) {
+        die("Error in SQL query preparation: " . mysqli_error($conn));
+    }
+
+    mysqli_stmt_execute($stmtMembers);
+
+    if (!$stmtMembers) {
+        die("Error in SQL query execution: " . mysqli_error($conn));
+    }
+
+    $members = mysqli_stmt_get_result($stmtMembers)->fetch_all(MYSQLI_ASSOC);
+    mysqli_stmt_close($stmtMembers);
 
     // Display group members
     echo "<p>Group Members:</p>";
@@ -140,361 +148,94 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
     // Display group balances
     echo "<p>Group Balances:</p>";
     foreach ($members as $member) {
-        $balance = isset($member['user_id']) ? calculateGroupBalance($member['user_id'], $groupId, $conn) : 0;
+        $balance = calculateGroupBalance($member['user_id'], $groupId, $conn);
         echo "{$member['member_name']}: {$balance}<br>";
     }
 
     // Display amounts owed to each member
     echo "<p>Amounts Owed:</p>";
     foreach ($members as $member) {
-        $amountOwed = isset($member['user_id']) ? calculateAmountOwed($member['user_id'], $groupId, $conn) : 0;
+        $amountOwed = calculateAmountOwed($member['user_id'], $groupId, $conn);
         echo "{$member['member_name']} is owed {$amountOwed} for group expenses.<br>";
     }
-
-    // Check if the function is not already defined
-    if (!function_exists('calculateGroupBalance')) {
-        // Function to calculate group balance for a member
-        function calculateGroupBalance($userId, $groupId, $conn)
-        {
-            // Calculate total expenses paid by the user
-            $getPaidExpensesQuery = "SELECT SUM(amount) as total_paid FROM expenses WHERE paid_by = ? AND group_id = ?";
-            $stmtPaidExpenses = mysqli_prepare($conn, $getPaidExpensesQuery);
-            mysqli_stmt_bind_param($stmtPaidExpenses, "ii", $userId, $groupId);
-            mysqli_stmt_execute($stmtPaidExpenses);
-            $paidExpensesResult = mysqli_stmt_get_result($stmtPaidExpenses);
-            $totalPaid = mysqli_fetch_assoc($paidExpensesResult)['total_paid'];
-            mysqli_stmt_close($stmtPaidExpenses);
-
-            // Calculate total expenses where the user owes money
-            $getOwedExpensesQuery = "SELECT SUM(amount) as total_owed FROM expenses WHERE owe_to = ? AND group_id = ?";
-            $stmtOwedExpenses = mysqli_prepare($conn, $getOwedExpensesQuery);
-            mysqli_stmt_bind_param($stmtOwedExpenses, "ii", $userId, $groupId);
-            mysqli_stmt_execute($stmtOwedExpenses);
-            $owedExpensesResult = mysqli_stmt_get_result($stmtOwedExpenses);
-            $totalOwed = mysqli_fetch_assoc($owedExpensesResult)['total_owed'];
-            mysqli_stmt_close($stmtOwedExpenses);
-
-            // Calculate the balance
-            $balance = $totalPaid - $totalOwed;
-
-            return $balance;
-        }
-    }
-    // Check if the function is not already defined
-    if (!function_exists('calculateAmountOwed')) {
-        // Function to calculate amounts owed to each member
-        function calculateAmountOwed($userId, $groupId, $conn)
-        {
-            // Query to get total expenses paid by the user in the group
-            $userExpensesQuery = "SELECT SUM(amount) AS total_expenses FROM expenses WHERE paid_by = ? AND group_id = ?";
-            $stmtUserExpenses = mysqli_prepare($conn, $userExpensesQuery);
-            mysqli_stmt_bind_param($stmtUserExpenses, "ii", $userId, $groupId);
-            mysqli_stmt_execute($stmtUserExpenses);
-            $totalUserExpenses = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtUserExpenses))['total_expenses'];
-
-            // Query to get total expenses for the group
-            $groupExpensesQuery = "SELECT SUM(amount) AS group_total_expenses FROM expenses WHERE group_id = ?";
-            $stmtGroupExpenses = mysqli_prepare($conn, $groupExpensesQuery);
-            mysqli_stmt_bind_param($stmtGroupExpenses, "i", $groupId);
-            mysqli_stmt_execute($stmtGroupExpenses);
-            $totalGroupExpenses = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtGroupExpenses))['group_total_expenses'];
-
-            // Calculate the amount owed based on your business logic
-            // For example, if the user's expenses are 20% of the group's total expenses, the user is owed 20% of the total expenses
-            $amountOwed = ($totalGroupExpenses > 0) ? ($totalUserExpenses / $totalGroupExpenses) : 0;
-
-            // Close the statements
-            mysqli_stmt_close($stmtUserExpenses);
-            mysqli_stmt_close($stmtGroupExpenses);
-
-            // Return the calculated amount
-            return $amountOwed;
-        }
-    }
-
-?>
-
-    <script>
-        // Add your custom JavaScript for interactive features
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('form').addEventListener('submit', function() {
-                var paidBySelect = document.getElementById('paid_by');
-                var oweToSelect = document.getElementById('owe_to');
-
-                var paidById = paidBySelect.options[paidBySelect.selectedIndex].value;
-                var oweToId = oweToSelect.options[oweToSelect.selectedIndex].value;
-
-                alert('Paid By ID: ' + paidById + ', Owe To ID: ' + oweToId);
-            });
-        });
-    </script>
-
-
-
-
-<?php
-    // Check if the function is not already defined
-    if (!function_exists('getPaidBy')) {
-        // Function to get the user who paid for a specific expense
-        function getPaidBy($expenseId)
-        {
-            global $conn;
-
-            $getPaidByQuery = "SELECT group_members.member_name
-                      FROM group_members
-                      LEFT JOIN expenses ON group_members.user_id = expenses.paid_by
-                      WHERE expenses.expense_id = ?";
-            $stmtPaidBy = mysqli_prepare($conn, $getPaidByQuery);
-            mysqli_stmt_bind_param($stmtPaidBy, "i", $expenseId);
-            mysqli_stmt_execute($stmtPaidBy);
-            $paidBy = mysqli_stmt_get_result($stmtPaidBy)->fetch_assoc();
-            mysqli_stmt_close($stmtPaidBy);
-
-            return ($paidBy && isset($paidBy['member_name'])) ? $paidBy['member_name'] : 'N/A';
-        }
-    }
-    // Check if the function is not already defined
-    if (!function_exists('getOwes')) {
-        // Function to get the users who owe for a specific expense
-        function getOwes($expenseId)
-        {
-            global $conn;
-
-            $getOwesQuery = "SELECT group_members.member_name
-                     FROM group_members
-                     LEFT JOIN expenses ON group_members.user_id = expenses.owe_to
-                     WHERE expenses.expense_id = ?";
-            $stmtOwes = mysqli_prepare($conn, $getOwesQuery);
-            mysqli_stmt_bind_param($stmtOwes, "i", $expenseId);
-            mysqli_stmt_execute($stmtOwes);
-            $owesResult = mysqli_stmt_get_result($stmtOwes);
-
-            // Fetch owes details
-            $owes = [];
-            while ($row = mysqli_fetch_assoc($owesResult)) {
-                $owes[] = $row['member_name'];
-            }
-
-            mysqli_stmt_close($stmtOwes);
-
-            return (!empty($owes)) ? implode(', ', $owes) : 'N/A';
-        }
-    }
-    // Check if the function is not already defined
-    if (!function_exists('getSplitDetails')) {
-        // Function to get the split details for a specific expense
-        function getSplitDetails($expenseId)
-        {
-            global $conn;
-
-            // Query to retrieve split details based on the expense ID
-            $splitDetailsQuery = "SELECT user_id, amount FROM expense_splits WHERE expense_id = ?";
-            $stmtSplitDetails = mysqli_prepare($conn, $splitDetailsQuery);
-            mysqli_stmt_bind_param($stmtSplitDetails, "i", $expenseId);
-            mysqli_stmt_execute($stmtSplitDetails);
-            $splitDetailsResult = mysqli_stmt_get_result($stmtSplitDetails);
-
-            // Fetch split details
-            $splitDetails = [];
-            while ($row = mysqli_fetch_assoc($splitDetailsResult)) {
-                $splitDetails[] = [
-                    'user_id' => $row['user_id'],
-                    'amount' => $row['amount'],
-                ];
-            }
-
-            mysqli_stmt_close($stmtSplitDetails);
-
-            // Format split details for display
-            $formattedDetails = [];
-            foreach ($splitDetails as $split) {
-                $formattedDetails[] = "User ID: {$split['user_id']}, Amount: {$split['amount']}";
-            }
-
-            // Return the formatted split details
-            return (!empty($formattedDetails)) ? implode('<br>', $formattedDetails) : 'N/A';
-        }
-    }
 }
+
+// Function to calculate group balance for a member
+function calculateGroupBalance($userId, $groupId, $conn)
+{
+    // Calculate total expenses paid by the user
+    $getPaidExpensesQuery = "SELECT SUM(amount) as total_paid FROM expenses WHERE paid_by = ? AND group_id = ?";
+    $stmtPaidExpenses = mysqli_prepare($conn, $getPaidExpensesQuery);
+    mysqli_stmt_bind_param($stmtPaidExpenses, "ii", $userId, $groupId);
+    mysqli_stmt_execute($stmtPaidExpenses);
+    $paidExpensesResult = mysqli_stmt_get_result($stmtPaidExpenses);
+    $totalPaid = mysqli_fetch_assoc($paidExpensesResult)['total_paid'];
+    mysqli_stmt_close($stmtPaidExpenses);
+
+    // Calculate total expenses where the user owes money
+    $getOwedExpensesQuery = "SELECT SUM(amount) as total_owed FROM expenses WHERE owe_to = ? AND group_id = ?";
+    $stmtOwedExpenses = mysqli_prepare($conn, $getOwedExpensesQuery);
+    mysqli_stmt_bind_param($stmtOwedExpenses, "ii", $userId, $groupId);
+    mysqli_stmt_execute($stmtOwedExpenses);
+    $owedExpensesResult = mysqli_stmt_get_result($stmtOwedExpenses);
+    $totalOwed = mysqli_fetch_assoc($owedExpensesResult)['total_owed'];
+    mysqli_stmt_close($stmtOwedExpenses);
+
+    // Calculate the balance
+    $balance = $totalPaid - $totalOwed;
+
+    return $balance;
+}
+
+// Function to calculate amounts owed to each member
+function calculateAmountOwed($userId, $groupId, $conn) {
+    // 1. Query to get total expenses paid by the user in the group
+    $getTotalExpensesQuery = "SELECT SUM(amount) AS total_expenses FROM expenses WHERE paid_by = ? AND group_id = ?";
+    $stmtTotalExpenses = mysqli_prepare($conn, $getTotalExpensesQuery);
+    mysqli_stmt_bind_param($stmtTotalExpenses, "ii", $userId, $groupId);
+    mysqli_stmt_execute($stmtTotalExpenses);
+    $resultTotalExpenses = mysqli_stmt_get_result($stmtTotalExpenses);
+    $totalExpenses = mysqli_fetch_assoc($resultTotalExpenses)['total_expenses'];
+
+    // 2. Query to get total expenses for the group
+    $getGroupTotalExpensesQuery = "SELECT SUM(amount) AS group_total_expenses FROM expenses WHERE group_id = ?";
+    $stmtGroupTotalExpenses = mysqli_prepare($conn, $getGroupTotalExpensesQuery);
+    mysqli_stmt_bind_param($stmtGroupTotalExpenses, "i", $groupId);
+    mysqli_stmt_execute($stmtGroupTotalExpenses);
+    $resultGroupTotalExpenses = mysqli_stmt_get_result($stmtGroupTotalExpenses);
+    $groupTotalExpenses = mysqli_fetch_assoc($resultGroupTotalExpenses)['group_total_expenses'];
+
+    // 3. Calculate the amount owed based on your business logic
+    // For example, if the user's expenses are 20% of the group's total expenses, the user is owed 20% of the total expenses
+    $amountOwed = ($groupTotalExpenses > 0) ? ($totalExpenses / $groupTotalExpenses) : 0;
+
+    // Close the statements
+    mysqli_stmt_close($stmtTotalExpenses);
+    mysqli_stmt_close($stmtGroupTotalExpenses);
+
+    // Return the calculated amount
+    return $amountOwed;
+}
+
 ?>
+
+
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
+    <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>View Group - <?php echo htmlspecialchars($group['group_name']); ?></title>
-    <link rel="stylesheet" href="view_group.css"> <!-- Link to your custom CSS file -->
-
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-            background: #f2f2f2;
-            overflow-x: hidden;
-            /* Prevent horizontal scrollbar */
-        }
-
-        header {
-            background: #333;
-            padding: 15px 20px;
-            color: white;
-            text-align: center;
-            animation: fadeInDown 1s ease-out;
-        }
-
-        .container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            min-height: 100vh;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin: 20px;
-            animation: fadeInUp 1s ease-out;
-        }
-
-        .content {
-            text-align: center;
-            padding: 20px;
-        }
-
-        h1,
-        h2 {
-            color: #333;
-            animation: fadeIn 1s ease-out;
-        }
-
-        .group-details,
-        .expenses {
-            margin-top: 20px;
-            animation: fadeInLeft 1s ease-out;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-
-        th,
-        td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        th {
-            background-color: #f2f2f2;
-        }
-
-        form {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            margin-top: 20px;
-            animation: fadeInRight 1s ease-out;
-        }
-
-        input[type="text"],
-        input[type="number"],
-        input[type="date"],
-        select {
-            padding: 8px;
-            margin: 8px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            background: #333;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        button:hover {
-            background: crimson;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-40px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes fadeInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-40px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        @keyframes fadeInRight {
-            from {
-                opacity: 0;
-                transform: translateX(40px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="">
 </head>
 
 <body>
-    <header>
-        <h1>Expense Tracker</h1>
-    </header>
+
 
     <div class="container">
         <div class="content">
@@ -502,11 +243,12 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
 
             <div class="group-details">
                 <h2>Group Details</h2>
-                <table>
+              <table>
                     <tr>
                         <th>Group Name</th>
                         <td><?php echo htmlspecialchars($group['group_name']); ?></td>
                     </tr>
+
                 </table>
             </div>
 
@@ -514,13 +256,30 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
                 <h2>Expenses</h2>
                 <?php if (!empty($expenses)) : ?>
                     <table>
-                        <!-- ... (your existing code to display expenses) ... -->
+                        <tr>
+                            <th>Expense Name</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+
+                        </tr>
+                        <?php foreach ($expenses as $expense) : ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($expense['expense_name']); ?></td>
+                                <td><?php echo htmlspecialchars($expense['amount']); ?></td>
+                                <td><?php echo htmlspecialchars($expense['date']); ?></td>
+                            </tr>
+                            <tr>
+                                <td colspan="5">
+                                    <strong>Split Details:</strong><br>
+                                    <?php echo getSplitDetails($expense['expense_id']); ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+
                     </table>
                 <?php else : ?>
                     <p>No expenses found for this group.</p>
                 <?php endif; ?>
-
-                <!-- Display the add expense form always -->
                 <form method="POST" action="view_group.php?group_id=<?php echo $groupId; ?>">
                     <label for="expense_name">Expense Name:</label>
                     <input type="text" id="expense_name" name="expense_name" required>
@@ -533,38 +292,175 @@ while ($row = mysqli_fetch_assoc($allGroupsResult)) {
 
                     <label for="paid_by">Paid By:</label>
                     <select id="paid_by" name="paid_by" required>
-                        <?php foreach ($members as $member) : ?>
-                            <option value='<?php echo $member['user_id']; ?>'><?php echo htmlspecialchars($member['member_name']); ?></option>
-                        <?php endforeach; ?>
+                        <?php
+                        foreach ($members as $member) {
+                            echo "<option value='{$member['user_id']}'>{$member['member_name']}</option>";
+                        }
+                        ?>
                     </select>
 
                     <label for="owe_to">Owe To:</label>
                     <select id="owe_to" name="owe_to" required>
-                        <?php foreach ($members as $member) : ?>
-                            <option value='<?php echo $member['user_id']; ?>'><?php echo htmlspecialchars($member['member_name']); ?></option>
-                        <?php endforeach; ?>
+                        <?php
+                        foreach ($members as $member) {
+                            echo "<option value='{$member['user_id']}'>{$member['member_name']}</option>";
+                        }
+                        ?>
                     </select>
+
+                
+                <button type="submit" name="add_expense">Add Expense</button>
+                </form>
+            </div>
+
+            <div class="members">
+                <h2>Group Members</h2>
+                <?php if (!empty($members)) : ?>
+                    <table>
+                        <tr>
+                            <th>Member Name</th>
+                            <!-- Add more member details as needed -->
+                        </tr>
+                        <?php foreach ($members as $member) : ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($member['member_name']); ?></td>
+                                <!-- Add more member details as needed -->
+                            </tr>
+                        <?php endforeach; ?>
+                    </table>
+                <?php else : ?>
+                    <p>No members found for this group.</p>
+                <?php endif; ?>
+
+                <form method="POST" action="view_group.php?group_id=<?php echo $groupId; ?>">
+                    <!-- ... other form fields ... -->
+                    <label for="paid_by">Paid By:</label>
+                    <select id="paid_by" name="paid_by" required>
+                        <option value="">Select User</option> <!-- Add a default option -->
+                        <?php
+                        foreach ($members as $member) {
+                            echo "<option value='{$member['user_id']}'>{$member['member_name']}</option>";
+                        }
+                        ?>
+                    </select>
+
+                    <label for="owe_to">Owe To:</label>
+                    <select id="owe_to" name="owe_to" required>
+                        <option value="">Select User</option> <!-- Add a default option -->
+                        <?php
+                        foreach ($members as $member) {
+                            echo "<option value='{$member['user_id']}'>{$member['member_name']}</option>";
+                        }
+                        ?>
+                    </select>
+
+
 
                     <button type="submit" name="add_expense">Add Expense</button>
                 </form>
+
+            </div>
+
+            <div class="summary">
+                <h2>Summary</h2>
+                <!-- Add your summary information here -->
             </div>
         </div>
     </div>
-
-    <script>
-        // Add your custom JavaScript for interactive features
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelector('form').addEventListener('submit', function() {
-                var paidBySelect = document.getElementById('paid_by');
-                var oweToSelect = document.getElementById('owe_to');
-
-                var paidById = paidBySelect.options[paidBySelect.selectedIndex].value;
-                var oweToId = oweToSelect.options[oweToSelect.selectedIndex].value;
-
-                alert('Paid By ID: ' + paidById + ', Owe To ID: ' + oweToId);
-            });
-        });
-    </script>
 </body>
 
 </html>
+<script>
+    document.querySelector('form').addEventListener('submit', function() {
+        var paidBySelect = document.getElementById('paid_by');
+        var oweToSelect = document.getElementById('owe_to');
+
+        var paidById = paidBySelect.options[paidBySelect.selectedIndex].value;
+        var oweToId = oweToSelect.options[oweToSelect.selectedIndex].value;
+
+        alert('Paid By ID: ' + paidById + ', Owe To ID: ' + oweToId);
+    });
+</script>
+
+
+
+
+<?php
+
+// Function to get the user who paid for a specific expense
+function getPaidBy($expenseId)
+{
+    global $conn;
+
+    $getPaidByQuery = "SELECT group_members.member_name
+                      FROM group_members
+                      LEFT JOIN expenses ON group_members.user_id = expenses.paid_by
+                      WHERE expenses.expense_id = ?";
+    $stmtPaidBy = mysqli_prepare($conn, $getPaidByQuery);
+    mysqli_stmt_bind_param($stmtPaidBy, "i", $expenseId);
+    mysqli_stmt_execute($stmtPaidBy);
+    $paidBy = mysqli_stmt_get_result($stmtPaidBy)->fetch_assoc();
+    mysqli_stmt_close($stmtPaidBy);
+
+    return ($paidBy && isset($paidBy['member_name'])) ? $paidBy['member_name'] : 'N/A';
+}
+
+// Function to get the users who owe for a specific expense
+function getOwes($expenseId)
+{
+    global $conn;
+
+    $getOwesQuery = "SELECT group_members.member_name
+                     FROM group_members
+                     LEFT JOIN expenses ON group_members.user_id = expenses.owe_to
+                     WHERE expenses.expense_id = ?";
+    $stmtOwes = mysqli_prepare($conn, $getOwesQuery);
+    mysqli_stmt_bind_param($stmtOwes, "i", $expenseId);
+    mysqli_stmt_execute($stmtOwes);
+    $owesResult = mysqli_stmt_get_result($stmtOwes);
+
+    // Fetch owes details
+    $owes = [];
+    while ($row = mysqli_fetch_assoc($owesResult)) {
+        $owes[] = $row['member_name'];
+    }
+
+    mysqli_stmt_close($stmtOwes);
+
+    return (!empty($owes)) ? implode(', ', $owes) : 'N/A';
+}
+
+// Function to get the split details for a specific expense
+function getSplitDetails($expenseId)
+{
+    global $conn;
+
+    // Query to retrieve split details based on the expense ID
+    $splitDetailsQuery = "SELECT user_id, amount FROM expense_splits WHERE expense_id = ?";
+    $stmtSplitDetails = mysqli_prepare($conn, $splitDetailsQuery);
+    mysqli_stmt_bind_param($stmtSplitDetails, "i", $expenseId);
+    mysqli_stmt_execute($stmtSplitDetails);
+    $splitDetailsResult = mysqli_stmt_get_result($stmtSplitDetails);
+
+    // Fetch split details
+    $splitDetails = [];
+    while ($row = mysqli_fetch_assoc($splitDetailsResult)) {
+        $splitDetails[] = [
+            'user_id' => $row['user_id'],
+            'amount' => $row['amount'],
+        ];
+    }
+
+    mysqli_stmt_close($stmtSplitDetails);
+
+    // Format split details for display
+    $formattedDetails = [];
+    foreach ($splitDetails as $split) {
+        $formattedDetails[] = "User ID: {$split['user_id']}, Amount: {$split['amount']}";
+    }
+
+    // Return the formatted split details
+    return (!empty($formattedDetails)) ? implode('<br>', $formattedDetails) : 'N/A';
+}
+
+?>

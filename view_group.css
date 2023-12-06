@@ -1,18 +1,16 @@
+
 body {
     margin: 0;
     padding: 0;
     font-family: 'Poppins', sans-serif;
-    background: #f2f2f2;
-    overflow-x: hidden;
-    /* Prevent horizontal scrollbar */
+    background: white;
+    overflow: hidden;
 }
 
 header {
     background: #333;
     padding: 15px 20px;
     color: white;
-    text-align: center;
-    animation: fadeInDown 1s ease-out;
 }
 
 .container {
@@ -25,7 +23,8 @@ header {
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin: 20px;
-    animation: fadeInUp 1s ease-out;
+    width: 100%;
+    max-width: 1200px; 
 }
 
 .content {
@@ -33,57 +32,42 @@ header {
     padding: 20px;
 }
 
-h1,
-h2 {
+h1, h2 {
     color: #333;
-    animation: fadeIn 1s ease-out;
-}
-
-.group-details,
-.expenses {
-    margin-top: 20px;
-    animation: fadeInLeft 1s ease-out;
 }
 
 table {
     width: 100%;
+    margin-top: 20px;
     border-collapse: collapse;
-    margin-top: 10px;
 }
 
-th,
-td {
+table, th, td {
     border: 1px solid #ddd;
-    padding: 8px;
+}
+
+th, td {
+    padding: 12px;
     text-align: left;
 }
 
 th {
-    background-color: #f2f2f2;
+    background-color: #333;
+    color: white;
 }
 
-form {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
+.expenses form {
     margin-top: 20px;
-    animation: fadeInRight 1s ease-out;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
 }
 
-input[type="text"],
-input[type="number"],
-input[type="date"],
-select {
-    padding: 8px;
-    margin: 8px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    width: 100%;
-    box-sizing: border-box;
+.expenses form label, .expenses form input, .expenses form select {
+    margin-bottom: 10px;
 }
 
-button {
+.expenses form button {
     padding: 10px 20px;
     font-size: 16px;
     background: #333;
@@ -94,66 +78,32 @@ button {
     transition: background 0.3s ease;
 }
 
-button:hover {
+.expenses form button:hover {
     background: crimson;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.members form {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
 }
 
-@keyframes fadeInDown {
-    from {
-        opacity: 0;
-        transform: translateY(-40px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.members form label, .members form input {
+    margin-bottom: 10px;
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(40px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.members form button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
 }
 
-@keyframes fadeInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-40px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes fadeInRight {
-    from {
-        opacity: 0;
-        transform: translateX(40px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
+.members form button:hover {
+    background: crimson;
 }
