@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (mysqli_stmt_execute($stmtExpense)) {
         mysqli_stmt_close($stmtExpense);
         // Redirect or display success message
-        header("Location: view_group.php?group_id=$groupId");
+        header("Location: group_dashboard.php?group_id=$groupId");
         exit();
     } else {
         $error = 'Failed to add expense. Please try again.';
