@@ -62,11 +62,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     mysqli_stmt_close($stmtExpense);
 
 
-    $insertExpenseRelationQuery = "INSERT INTO expense_relation (expense_id, paid_for, date) VALUES (?, ?, STR_TO_DATE(?, '%Y-%m-%d'))";
+    $insertExpenseRelationQuery = "INSERT INTO expenses_relation (expense_id, paid_for, date) VALUES (?, ?, STR_TO_DATE(?, '%Y-%m-%d'))";
     $stmtExpenseRelation = mysqli_prepare($conn, $insertExpenseRelationQuery);
-    mysqli_stmt_bind_param($stmtExpenseRelation, "iss", $expense[0]['expense_id'], $oweTo, $date);
-
-    if (mysqli_stmt_execute($stmtExpenseRelation)) {
+    foreach ($oweTo as $paidFor) {
+        mysqli_stmt_bind_param($stmtExpenseRelation, "iss", $expense[0]['expense_id'], $paidFor, $date);
+        $success = mysqli_stmt_execute($stmtExpenseRelation);
+    }
+    if ($success) {
         mysqli_stmt_close($stmtExpenseRelation);
         // Redirect or display success message
         header("Location: group_dashboard.php?group_id=$groupId");
