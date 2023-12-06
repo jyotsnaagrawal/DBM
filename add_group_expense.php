@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $insertExpenseRelationQuery = "INSERT INTO expenses_relation (expense_id, paid_for, date, amount_owe, owe_to) VALUES (?, ?, STR_TO_DATE(?, '%Y-%m-%d'), ?, ?)";
     $stmtExpenseRelation = mysqli_prepare($conn, $insertExpenseRelationQuery);
     foreach ($oweTo as $paidFor) {
-        mysqli_stmt_bind_param($stmtExpenseRelation, "issds", $expense[0]['expense_id'], $paidFor, $date, $amountOwe, $paidBy);
+        mysqli_stmt_bind_param($stmtExpenseRelation, "issds", $expense[0]['expense_id'], $paidFor, $date, $amountOwe, $paidBy[0]);
         $success = mysqli_stmt_execute($stmtExpenseRelation);
     }
     if ($success) {
