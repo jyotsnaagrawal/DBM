@@ -13,6 +13,15 @@ if (!isset($_SESSION['admin_name']) && !isset($_SESSION['user_id'])) {
 
 $groupId = isset($_GET['group_id']) ? $_GET['group_id'] : null;
 
+// // Fetch all groups 
+
+// $selectGroupsQuery = "SELECT * FROM groups";
+// $stmtGroups = mysqli_prepare($conn, $selectGroupsQuery);
+// mysqli_stmt_execute($stmtGroups);
+// $groupsResult = mysqli_stmt_get_result($stmtGroups);
+// $groups = mysqli_fetch_all($groupsResult, MYSQLI_ASSOC);
+// mysqli_stmt_close($stmtGroups);
+
 // Fetch group members based on the selected group ID
 if ($groupId) {
     $selectMembersQuery = "SELECT * FROM group_members WHERE group_id = ?";
@@ -27,10 +36,10 @@ if ($groupId) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Your existing code for adding new members to the group
 
-    $groupId = $_POST['group_id'];
+   // $groupId = $_POST['group_id'];
     $expenseName = mysqli_real_escape_string($conn, $_POST['expense_name']);
-    $amount = mysqli_real_escape_string($conn, $_POST['amount']);
-    $date = mysqli_real_escape_string($conn, $_POST['date']);
+    $amount = mysqli_real_escape_string($conn, $_POST['expense_amount']);
+    $date = mysqli_real_escape_string($conn, $_POST['expense_date']);
     $paidBy = $_POST['paid_by']; // Modified to handle multiple selections
     $oweTo = $_POST['owe_to']; // Modified to handle multiple selections
 
@@ -88,12 +97,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <!-- Your add group expense form goes here -->
             <form method="POST" action="add_group_expense.php">
-                <label for="group_id">Select Group:</label>
+                <!-- <label for="group_id">Select Group:</label>
                 <select id="group_id" name="group_id" required>
                     <?php foreach ($groups as $group) : ?>
                         <option value="<?php echo $group['group_id']; ?>"><?php echo $group['group_name']; ?></option>
                     <?php endforeach; ?>
-                </select>
+                </select> -->
 
                 <label for="expense_name">Expense Name:</label>
                 <input type="text" id="expense_name" name="expense_name" required>
@@ -101,18 +110,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <label for="expense_amount">Expense Amount:</label>
                 <input type="number" id="expense_amount" name="expense_amount" step="0.01" required>
 
-        <!-- Modified "Paid By" field for multiple selections -->
-        <label for="paid_by">Paid By:</label>
+                <label for="expense_date">Expense Date:</label>
+                <input type="date" id="expense_date" name="expense_date" required>
+
+                <!-- Modified "Paid By" field for multiple selections -->
+                <label for="paid_by">Paid By:</label>
                 <select id="paid_by" name="paid_by[]" multiple>
                     <?php foreach ($members as $member) : ?>
-                        <option value="<?php echo $member['member_id']; ?>"><?php echo $member['member_name']; ?></option>
+                        <option value="<?php echo $member['id']; ?>"><?php echo $member['member_name']; ?></option>
                     <?php endforeach; ?>
                 </select>
+
                  <!-- Modified "Owe To" field for multiple selections -->
                  <label for="owe_to">Owe To:</label>
                 <select id="owe_to" name="owe_to[]" multiple>
                     <?php foreach ($members as $member) : ?>
-                        <option value="<?php echo $member['member_id']; ?>"><?php echo $member['member_name']; ?></option>
+                        <option value="<?php echo $member['id']; ?>"><?php echo $member['member_name']; ?></option>
                     <?php endforeach; ?>
                 </select>
                    

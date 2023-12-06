@@ -11,7 +11,20 @@ if (!isset($_SESSION['admin_name']) && !isset($_SESSION['user_id'])) {
     exit();
 }
 
-$groupId = isset($_GET['group_id']) ? $_GET['group_id'] : null;
+$groupName = isset($_GET['group_name']) ? $_GET['group_name'] : null;
+$adminId = isset($_GET['admin_id']) ? $_GET['admin_id'] : null;
+
+// Fetch group info
+$selectGroupQuery = "SELECT * FROM groups WHERE group_name = ? AND admin_id = ?";
+$stmtGroup = mysqli_prepare($conn, $selectGroupQuery);
+mysqli_stmt_bind_param($stmtGroup, "si", $groupName, $adminId);
+mysqli_stmt_execute($stmtGroup);
+$groupResult = mysqli_stmt_get_result($stmtGroup);
+$group = mysqli_fetch_all($groupResult, MYSQLI_ASSOC);
+mysqli_stmt_close($stmtGroup);
+$groupId = $group[0]['group_id'];
+
+
 
 // Fetch group members based on the selected group ID
 if ($groupId) {
@@ -26,7 +39,7 @@ if ($groupId) {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Your existing code for adding new members to the group
-
+    var_dump($groupId);
     $groupId = $_POST['group_id'];
     $memberName = mysqli_real_escape_string($conn, $_POST['member_name']);
 
@@ -80,13 +93,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </ul>
             <?php endif; ?>
 
-            <form method="POST" action="add_members.php">
-                <label for="group_id">Select Group:</label>
+            <form method="POST" action="add_members.php?group_id=$groupId">
+                <!-- <label for="group_id">Select Group:</label>
                 <select id="group_id" name="group_id" required>
                     <?php foreach ($groups as $group) : ?>
-                        <option value="<?php echo $group['group_id']; ?>"><?php echo $group['group_name']; ?></option>
+                        <option value="<?php echo $group['id']; ?>"><?php echo $group['group_name']; ?></option>
                     <?php endforeach; ?>
-                </select>
+                </select> -->
                 <label for="member_name">Member Name:</label>
                 <input type="text" id="member_name" name="member_name" required>
                 <button type="submit">Add Member</button>

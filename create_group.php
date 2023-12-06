@@ -35,11 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $insertGroupQuery = "INSERT INTO groups (group_name, admin_id) VALUES (?, ?)";
         $stmt = mysqli_prepare($conn, $insertGroupQuery);
         mysqli_stmt_bind_param($stmt, "si", $groupName, $adminId);
-
         if (mysqli_stmt_execute($stmt)) {
             // Group creation successful
             mysqli_stmt_close($stmt);
-            header('Location: individual_dashboard.php');
+            header("Location: add_members.php?group_name=$groupName&admin_id=$adminId");
             exit();
         } else {
             // Group creation failed
