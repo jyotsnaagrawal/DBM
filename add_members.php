@@ -93,13 +93,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </ul>
             <?php endif; ?>
 
-            <form method="POST" action="add_members.php?group_id=$groupId">
+            <form method="POST" action="add_members.php">
                 <!-- <label for="group_id">Select Group:</label>
                 <select id="group_id" name="group_id" required>
                     <?php foreach ($groups as $group) : ?>
                         <option value="<?php echo $group['id']; ?>"><?php echo $group['group_name']; ?></option>
                     <?php endforeach; ?>
                 </select> -->
+                <input type='hidden' name='group_id' value='<?php echo "$groupId";?>'/>
                 <label for="member_name">Member Name:</label>
                 <input type="text" id="member_name" name="member_name" required>
                 <button type="submit">Add Member</button>

@@ -36,7 +36,7 @@ if ($groupId) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Your existing code for adding new members to the group
 
-   // $groupId = $_POST['group_id'];
+    $groupId = $_POST['group_id'];
     $expenseName = mysqli_real_escape_string($conn, $_POST['expense_name']);
     $amount = mysqli_real_escape_string($conn, $_POST['expense_amount']);
     $date = mysqli_real_escape_string($conn, $_POST['expense_date']);
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (mysqli_stmt_execute($stmtExpense)) {
         mysqli_stmt_close($stmtExpense);
         // Redirect or display success message
-        header("Location: group_dashboard.php?group_id=$groupId");
+        header("Location: view_group.php?group_id=$groupId");
         exit();
     } else {
         $error = 'Failed to add expense. Please try again.';
@@ -104,6 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php endforeach; ?>
                 </select> -->
 
+                <input type='hidden' name='group_id' value='<?php echo "$groupId";?>'/>
                 <label for="expense_name">Expense Name:</label>
                 <input type="text" id="expense_name" name="expense_name" required>
 
