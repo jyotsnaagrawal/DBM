@@ -49,6 +49,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (mysqli_stmt_execute($stmtExpense)) {
         mysqli_stmt_close($stmtExpense);
+    } else {
+        $error = 'Failed to add expense. Please try again.';
+    }
+
+    $selectExpenseQuery = "SELECT expense_id FROM group_expenses WHERE group_id = ? AND expense_name = ?";
+    $stmtExpense = mysqli_prepare($conn, $selectExpenseQuery);
+    mysqli_stmt_bind_param($stmtExpense, "is", $groupId, $expenseName);
+    mysqli_stmt_execute($stmtExpense);
+    $expenseResult = mysqli_stmt_get_result($stmtExpense);
+    $expense = mysqli_fetch_all($expenseResult, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmtExpense);
+
+
+    $insertExpenseRelationQuery = "INSERT INTO expense_relation (expense_id, paid_for, date) VALUES (?, ?, STR_TO_DATE(?, '%Y-%m-%d'))";
+    $stmtExpenseRelation = mysqli_prepare($conn, $insertExpenseRelationQuery);
+    mysqli_stmt_bind_param($stmtExpenseRelation, "iss", $expense[0]['expense_id'], $oweTo, $date);
+
+    if (mysqli_stmt_execute($stmtExpenseRelation)) {
+        mysqli_stmt_close($stmtExpenseRelation);
         // Redirect or display success message
         header("Location: group_dashboard.php?group_id=$groupId");
         exit();
