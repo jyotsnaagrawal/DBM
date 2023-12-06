@@ -1,23 +1,4 @@
-<?php
-session_start();
 
-if (!isset($_SESSION['admin_name'])) {
-    header('Location: manage_groups.php');
-    exit();
-}
-
-include 'config.php';
-
-// Fetch and display admin-specific information from user_form table
-$adminId = $_SESSION['admin_id']; // Assuming you store admin_id in the session
-
-$selectAdmin = "SELECT * FROM user_db.user_form WHERE ID = ?";
-$stmtAdmin = mysqli_prepare($conn, $selectAdmin);
-mysqli_stmt_bind_param($stmtAdmin, "i", $adminId);
-mysqli_stmt_execute($stmtAdmin);
-$adminData = mysqli_stmt_get_result($stmtAdmin)->fetch_assoc();
-
-?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -159,3 +140,24 @@ $adminData = mysqli_stmt_get_result($stmtAdmin)->fetch_assoc();
    </script>
 </body>
 </html>
+
+<?php
+session_start();
+
+if (!isset($_SESSION['admin_name'])) {
+    header('Location: manage_groups.php');
+    exit();
+}
+
+include 'config.php';
+
+// Fetch and display admin-specific information from user_form table
+$adminId = $_SESSION['admin_id']; // Assuming you store admin_id in the session
+
+$selectAdmin = "SELECT * FROM user_db.user_form WHERE ID = ?";
+$stmtAdmin = mysqli_prepare($conn, $selectAdmin);
+mysqli_stmt_bind_param($stmtAdmin, "i", $adminId);
+mysqli_stmt_execute($stmtAdmin);
+$adminData = mysqli_stmt_get_result($stmtAdmin)->fetch_assoc();
+
+?>
