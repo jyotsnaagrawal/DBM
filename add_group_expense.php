@@ -43,9 +43,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $paidBy = $_POST['paid_by']; // Modified to handle multiple selections
     $oweTo = $_POST['owe_to']; // Modified to handle multiple selections
 
-    $insertExpenseQuery = "INSERT INTO group_expenses (group_id, expense_name, amount, date, paid_by, owe_to) VALUES (?, ?, ?, STR_TO_DATE(?, '%Y-%m-%d'), ?, ?)";
+    $insertExpenseQuery = "INSERT INTO group_expenses (group_id, expense_name, amount, date, paid_by) VALUES (?, ?, ?, STR_TO_DATE(?, '%Y-%m-%d'), ?)";
     $stmtExpense = mysqli_prepare($conn, $insertExpenseQuery);
-    mysqli_stmt_bind_param($stmtExpense, "isdsii", $groupId, $expenseName, $amount, $date, $paidBy, $oweTo);
+    mysqli_stmt_bind_param($stmtExpense, "isdss", $groupId, $expenseName, $amount, $date, $paidBy[0]);
 
     if (mysqli_stmt_execute($stmtExpense)) {
         mysqli_stmt_close($stmtExpense);
@@ -61,11 +61,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $expense = mysqli_fetch_all($expenseResult, MYSQLI_ASSOC);
     mysqli_stmt_close($stmtExpense);
 
+    $amountOwe = $amount/sizeof($oweTo);
 
-    $insertExpenseRelationQuery = "INSERT INTO expenses_relation (expense_id, paid_for, date) VALUES (?, ?, STR_TO_DATE(?, '%Y-%m-%d'))";
+    $insertExpenseRelationQuery = "INSERT INTO expenses_relation (expense_id, paid_for, date, amount_owe, owe_to) VALUES (?, ?, STR_TO_DATE(?, '%Y-%m-%d'), ?, ?)";
     $stmtExpenseRelation = mysqli_prepare($conn, $insertExpenseRelationQuery);
     foreach ($oweTo as $paidFor) {
-        mysqli_stmt_bind_param($stmtExpenseRelation, "iss", $expense[0]['expense_id'], $paidFor, $date);
+        mysqli_stmt_bind_param($stmtExpenseRelation, "issds", $expense[0]['expense_id'], $paidFor, $date, $amountOwe, $paidBy);
         $success = mysqli_stmt_execute($stmtExpenseRelation);
     }
     if ($success) {

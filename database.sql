@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Dec 06, 2023 at 11:05 PM
+-- Generation Time: Dec 07, 2023 at 12:41 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -36,6 +36,42 @@ CREATE TABLE `expenses` (
   `paid_by` int(11) DEFAULT NULL,
   `owe_to` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `expenses_relation`
+--
+
+CREATE TABLE `expenses_relation` (
+  `expense_id` int(11) NOT NULL,
+  `paid_for` varchar(255) DEFAULT NULL,
+  `date` date DEFAULT NULL,
+  `amount_owe` decimal(10,2) DEFAULT NULL,
+  `owe_to` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `expenses_relation`
+--
+
+INSERT INTO `expenses_relation` (`expense_id`, `paid_for`, `date`, `amount_owe`, `owe_to`) VALUES
+(10, 'Array', '2023-12-06', NULL, NULL),
+(10, '216', '2023-12-06', NULL, NULL),
+(10, '220', '2023-12-06', NULL, NULL),
+(10, '222', '2023-12-06', NULL, NULL),
+(13, '216', '2023-12-06', 26.67, NULL),
+(13, '220', '2023-12-06', 26.67, NULL),
+(13, '222', '2023-12-06', 26.67, NULL),
+(13, '216', '2023-12-06', 26.67, 'Array'),
+(13, '220', '2023-12-06', 26.67, 'Array'),
+(13, '222', '2023-12-06', 26.67, 'Array'),
+(13, '216', '2023-12-06', 26.67, 'Array'),
+(13, '220', '2023-12-06', 26.67, 'Array'),
+(13, '222', '2023-12-06', 26.67, 'Array'),
+(13, '216', '2023-12-06', 26.67, 'Array'),
+(13, '220', '2023-12-06', 26.67, 'Array'),
+(13, '222', '2023-12-06', 26.67, 'Array');
 
 -- --------------------------------------------------------
 
@@ -107,7 +143,10 @@ INSERT INTO `groups` (`group_id`, `group_name`, `admin_id`, `created_at`) VALUES
 (120, 'ratata', 50, '2023-12-06 21:08:52'),
 (121, 'ratata', 50, '2023-12-06 21:12:23'),
 (122, 'ratata', 50, '2023-12-06 21:13:56'),
-(123, 'ratata', 50, '2023-12-06 21:16:31');
+(123, 'ratata', 50, '2023-12-06 21:16:31'),
+(124, 'newGroup', 50, '2023-12-06 22:26:36'),
+(125, 'ratata', 50, '2023-12-06 22:38:33'),
+(126, 'ratata', 50, '2023-12-06 22:41:41');
 
 -- --------------------------------------------------------
 
@@ -138,7 +177,16 @@ INSERT INTO `group_expenses` (`expense_id`, `group_id`, `expense_name`, `amount`
 (6, 108, 'groceries', 77.00, '2023-12-27', '1', '1'),
 (7, 108, 'groceries', 77.00, '2023-12-27', '1', '1'),
 (8, 108, 'groceries', 77.00, '2023-12-27', '1', '1'),
-(9, 108, 'groceries', 77.00, '2023-12-27', '1', '1');
+(9, 108, 'groceries', 77.00, '2023-12-27', '1', '1'),
+(10, 108, 'LOKER', 12.00, '2023-12-06', '1', '1'),
+(11, 108, 'LOKER', 12.00, '2023-12-06', '1', '1'),
+(12, 108, 'LOKER', 12.00, '2023-12-06', '1', '1'),
+(13, 108, 'pooja', 80.00, '2023-12-06', '1', '1'),
+(14, 108, 'pooja', 80.00, '2023-12-06', '1', '1'),
+(15, 108, 'pooja', 80.00, '2023-12-06', '1', '1'),
+(16, 108, 'pooja', 80.00, '2023-12-06', '1', '1'),
+(17, 108, 'pooja', 80.00, '2023-12-06', 'Array', NULL),
+(18, 108, 'pooja', 80.00, '2023-12-06', '222', NULL);
 
 -- --------------------------------------------------------
 
@@ -212,7 +260,18 @@ INSERT INTO `group_members` (`id`, `group_id`, `user_id`, `created_at`, `member_
 (213, NULL, NULL, '2023-12-06 21:08:57', 'sxqs'),
 (214, NULL, NULL, '2023-12-06 21:12:26', 'sxqs'),
 (215, NULL, NULL, '2023-12-06 21:13:59', 'ahgjhhjs'),
-(216, 108, NULL, '2023-12-06 21:16:35', 'anshit');
+(216, 108, NULL, '2023-12-06 21:16:35', 'anshit'),
+(217, 78, NULL, '2023-12-06 22:26:03', ''),
+(218, 98, NULL, '2023-12-06 22:26:42', 'ram'),
+(219, 124, NULL, '2023-12-06 22:27:02', ''),
+(220, 108, NULL, '2023-12-06 22:38:40', 'vanshit'),
+(221, 0, NULL, '2023-12-06 22:38:46', 'vanshit'),
+(222, 108, NULL, '2023-12-06 22:41:54', 'ram'),
+(223, 126, NULL, '2023-12-06 23:14:48', ''),
+(224, 124, NULL, '2023-12-06 23:14:53', ''),
+(225, 123, NULL, '2023-12-06 23:14:57', ''),
+(226, 117, NULL, '2023-12-06 23:15:01', ''),
+(227, 108, NULL, '2023-12-06 23:15:05', '');
 
 -- --------------------------------------------------------
 
@@ -366,19 +425,19 @@ ALTER TABLE `expense_splits`
 -- AUTO_INCREMENT for table `groups`
 --
 ALTER TABLE `groups`
-  MODIFY `group_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=124;
+  MODIFY `group_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT for table `group_expenses`
 --
 ALTER TABLE `group_expenses`
-  MODIFY `expense_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `expense_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `group_members`
 --
 ALTER TABLE `group_members`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=217;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=228;
 
 --
 -- AUTO_INCREMENT for table `individual_expenses`
