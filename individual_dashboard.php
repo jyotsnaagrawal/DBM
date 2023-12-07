@@ -125,6 +125,8 @@ $adminData = mysqli_stmt_get_result($stmtAdmin)->fetch_assoc();
          </div>
          <ul class="nav-links">
             <li><a href="individual_dashboard.php">Dashboard</a></li>
+            <li><a href="add_expense.php">Add Individual Expense</a></li>
+            <li><a href="individual_expense_view.php">My Individual Expenses</a></li>
             <li><a href="group_owe.php">How Much I Owe</a></li>
             <li><a href="logout.php">Logout</a></li>
          </ul>
