@@ -57,11 +57,6 @@ if (isset($_GET['group_id'])) {
     mysqli_stmt_execute($stmtOwes);
     $owes = mysqli_stmt_get_result($stmtOwes)->fetch_all(MYSQLI_ASSOC);
 
-    // Organize the owed amounts for easy display
-    $owedAmounts = [];
-    foreach ($owes as $owe) {
-        $owedAmounts[$owe['owe_to']][$owe['owed_by']] = $owe['total_owed'];
-    }
 }
 
 ?>
@@ -109,24 +104,23 @@ if (isset($_GET['group_id'])) {
                 </select>
             </form>
 
-            <?php if (isset($owedAmounts) && !empty($owedAmounts)) : ?>
+            <?php if (isset($owes) && !empty($owes)) : ?>
                 <!-- Display owed amounts within the group -->
                 <h2>Owed Amounts</h2>
                 <table>
                     <tr>
-                        <th>Paid By</th>
+                        <th>Owed By</th>
                         <th>Owe To</th>
                         <th>Total Owed Amount</th>
                     </tr>
-                    <?php foreach ($owedAmounts as $paidBy => $oweToAmounts) : ?>
-                        <?php foreach ($oweToAmounts as $oweTo => $amount) : ?>
-                            <tr>
-                                <td><?php echo htmlspecialchars($owe['owe_to']); ?></td>
-                                <td><?php echo htmlspecialchars($owe['owed_by']); ?></td>
-                                <td><?php echo $amount; ?></td>
-                            </tr>
-                        <?php endforeach; ?>
+                    <?php foreach ($owes as $owe) : ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($owe['owed_by']); ?></td>
+                            <td><?php echo htmlspecialchars($owe['owe_to']); ?></td>
+                            <td><?php echo htmlspecialchars($owe['total_owed']); ?></td>
+                        </tr>
                     <?php endforeach; ?>
+
                 </table>
             <?php endif; ?>
         </div>
