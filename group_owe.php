@@ -95,7 +95,7 @@ if (isset($_GET['group_id'])) {
             <!-- Display group selection dropdown -->
             <form method="GET" action="group_owe.php">
                 <label for="group_select">Select Group:</label>
-                <select id="group_select" name="group_id" onchange="this.form.submit()" required>
+                <select id="group_select" name="group_id" onclick="this.form.submit()" required>
                     <?php foreach ($groups as $group) : ?>
                         <option value="<?php echo $group['group_id']; ?>" <?php echo (isset($_GET['group_id']) && $_GET['group_id'] == $group['group_id']) ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($group['group_name']); ?>
