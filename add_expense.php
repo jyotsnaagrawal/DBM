@@ -11,20 +11,26 @@ if (!isset($_SESSION['admin_name'])) {
 include 'config.php';
 
 // Fetch and display admin-specific information from user_form table
-$adminId = $_SESSION['admin_id'];
+$adminId = $_SESSION['admin_id']; // Assuming you store admin_id in the session
+
+$selectAdmin = "SELECT * FROM user_db.user_form WHERE user_id = ?";
+$stmtAdmin = mysqli_prepare($conn, $selectAdmin);
+mysqli_stmt_bind_param($stmtAdmin, "i", $adminId);
+mysqli_stmt_execute($stmtAdmin);
+$adminData = mysqli_stmt_get_result($stmtAdmin)->fetch_assoc();
 
 // Process the form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Retrieve form data
-    $expenseName = htmlspecialchars(mysqli_real_escape_string($conn, $_POST['expense_name']));
-    $expenseAmount = htmlspecialchars(mysqli_real_escape_string($conn, $_POST['expense_amount']));
-    $expenseDate = htmlspecialchars(mysqli_real_escape_string($conn, $_POST['expense_date']));
-    $deductible = isset($_POST['deductible']) ? 1 : 0;
+    $expenseName = mysqli_real_escape_string($conn, $_POST['expense_name']);
+    $expenseAmount = mysqli_real_escape_string($conn, $_POST['expense_amount']);
+    $expenseDate = mysqli_real_escape_string($conn, $_POST['expense_date']);
+    $deductible = isset($_POST['deductible']) ? 1 : 0; // Assuming checkbox value should be stored as a boolean
 
     // Perform database insertion using prepared statements to prevent SQL injection
-    $insertExpense = "INSERT INTO individual_expenses (expense_name, expense_amount, expense_date, deductible, ID) VALUES (?, ?, STR_TO_DATE(?, '%Y-%m-%d'), ?, ?)";
+    $insertExpense = "INSERT INTO individual_expenses (ID, expense_name, expense_amount, expense_date, deductible) VALUES (?, ?, ?, STR_TO_DATE(?, '%Y-%m-%d'), ?)";
     $stmt = mysqli_prepare($conn, $insertExpense);
-    mysqli_stmt_bind_param($stmt, "sdsii", $expenseName, $expenseAmount, $expenseDate, $deductible, $adminId);
+    mysqli_stmt_bind_param($stmt, "isdsi", $adminId, $expenseName, $expenseAmount, $expenseDate, $deductible);
 
     if (mysqli_stmt_execute($stmt)) {
         // Insertion successful
@@ -61,6 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <ul class="nav-links">
                 <li><a href="individual_dashboard.php">Dashboard</a></li>
                 <li><a href="#">Add an Expense</a></li>
+                <li><a href="#">Settle Up</a></li>
                 <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>

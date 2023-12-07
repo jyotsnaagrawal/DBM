@@ -31,7 +31,8 @@ if(!isset($_SESSION['user_name'])){
             </div>
             <ul class="nav-links">
                 <li><a href="#">Home</a></li>
-                <li><a href="create_group.php">Dashboard</a></li>
+                <li><a href="#">Dashboard</a></li>
+                <li><a href="#">Settings</a></li>
                 <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>

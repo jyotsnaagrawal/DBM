@@ -1,111 +1,96 @@
-body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins', sans-serif;
-    background: #f2f2f2;
-}
 
-header {
-    background: #333;
-    padding: 15px 20px;
-    color: white;
-    text-align: center;
-}
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f2f2f2;
+        }
 
-.container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    min-height: 100vh;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    margin: 20px;
-}
+        header {
+            background: #333;
+            padding: 15px 20px;
+            color: white;
+            text-align: center;
+        }
 
-.content {
-    text-align: center;
-    padding: 20px;
-}
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+        }
 
-h1 {
-    color: #333;
-}
+        .content {
+            text-align: center;
+            padding: 20px;
+        }
 
-.group-list {
-    margin-top: 20px;
-}
+        h1 {
+            color: #333;
+        }
 
-ul {
-    list-style: none;
-    padding: 0;
-}
+        .group-list {
+            margin-top: 20px;
+        }
 
-li {
-    margin-bottom: 10px;
-}
+        ul {
+            list-style: none;
+            padding: 0;
+        }
 
-form {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 20px; /* Added margin-top for separation */
-}
+        li {
+            margin-bottom: 10px;
+        }
 
-input[type="text"] {
-    padding: 8px;
-    margin-right: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
+        form {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background: #333;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
+        input[type="text"] {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
 
-button:hover {
-    background: crimson;
-}
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
 
-.group-buttons {
-    margin-top: 20px;
-    display: flex;
-    gap: 10px; /* Adjust the gap value based on your preference */
-}
+        button:hover {
+            background: crimson;
+        }
 
-button.create-group-btn {
-    padding: 10px 20px;
-    font-size: 16px;
-    background: #333;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
+        .group-buttons {
+            margin-top: 20px;
+        }
 
-button.view-page-buttons {
-    padding: 10px 20px;
-    font-size: 16px;
-    background: #333;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    margin-left: 10px; /* Adjust the margin value based on your preference */
-}
+        button.create-group-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
 
-button.create-group-btn:hover,
-button.view-page-buttons:hover {
-    background: crimson;
-}
-
+        button.create-group-btn:hover {
+            background: crimson;
+        }
+ 

@@ -1,43 +1,26 @@
 <?php
 session_start();
 
-// Check if the user is logged in
-if (!isset($_SESSION['admin_name'])) {
+if (!(isset($_SESSION['user_name']) || isset($_SESSION['admin_name']))) {
     header('Location: login_form.php');
     exit();
 }
 
-// Include your config file
 include 'config.php';
 
 // Fetch and display admin-specific information from user_form table
-$adminId = $_SESSION['admin_id'];
-
-// Process the form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Retrieve form data
-    $expenseName = htmlspecialchars(mysqli_real_escape_string($conn, $_POST['expense_name']));
-    $expenseAmount = htmlspecialchars(mysqli_real_escape_string($conn, $_POST['expense_amount']));
-    $expenseDate = htmlspecialchars(mysqli_real_escape_string($conn, $_POST['expense_date']));
-    $deductible = isset($_POST['deductible']) ? 1 : 0;
-
-    // Perform database insertion using prepared statements to prevent SQL injection
-    $insertExpense = "INSERT INTO individual_expenses (expense_name, expense_amount, expense_date, deductible, ID) VALUES (?, ?, STR_TO_DATE(?, '%Y-%m-%d'), ?, ?)";
-    $stmt = mysqli_prepare($conn, $insertExpense);
-    mysqli_stmt_bind_param($stmt, "sdsii", $expenseName, $expenseAmount, $expenseDate, $deductible, $adminId);
-
-    if (mysqli_stmt_execute($stmt)) {
-        // Insertion successful
-        mysqli_stmt_close($stmt);
-
-        // Redirect to the dashboard or display a success message
-        header('Location: individual_dashboard.php');
-        exit();
-    } else {
-        // Insertion failed
-        $error = 'Expense creation failed. Please try again. ' . mysqli_error($conn); // Provide more details for debugging
-    }
+if (isset($_SESSION['admin_name'])) {
+   $adminId = $_SESSION['admin_id']; // Assuming you store admin_id in the session
+} else if (isset($_SESSION['user_name'])) {
+   $adminId = $_SESSION['user_id']; // Assuming you store user_id in the session
 }
+
+$selectAdmin = "SELECT * FROM user_db.user_form WHERE user_id = ?";
+$stmtAdmin = mysqli_prepare($conn, $selectAdmin);
+mysqli_stmt_bind_param($stmtAdmin, "i", $adminId);
+mysqli_stmt_execute($stmtAdmin);
+$adminData = mysqli_stmt_get_result($stmtAdmin)->fetch_assoc();
+
 ?>
 
 <!DOCTYPE html>
@@ -142,7 +125,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
          </div>
          <ul class="nav-links">
             <li><a href="individual_dashboard.php">Dashboard</a></li>
-            <li><a href="add_expense.php">Add an Expense</a></li>
+            <li><a href="add_expense.php">Add Individual Expense</a></li>
+            <li><a href="individual_expense_view.php">My Individual Expenses</a></li>
+            <li><a href="group_owe.php">How Much I Owe</a></li>
             <li><a href="logout.php">Logout</a></li>
          </ul>
       </nav>

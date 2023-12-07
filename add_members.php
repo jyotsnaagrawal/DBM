@@ -3,22 +3,47 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-if (!isset($_SESSION['admin_name'])) {
+include 'config.php';
+
+// Check if either admin or user is logged in
+if (!isset($_SESSION['admin_name']) && !isset($_SESSION['user_id'])) {
     header('Location: login_form.php');
     exit();
 }
 
-include 'config.php';
+$groupName = isset($_GET['group_name']) ? $_GET['group_name'] : null;
+$adminId = isset($_GET['admin_id']) ? $_GET['admin_id'] : null;
 
-$selectGroupsQuery = "SELECT * FROM groups WHERE admin_id = ?";
-$stmtGroups = mysqli_prepare($conn, $selectGroupsQuery);
-mysqli_stmt_bind_param($stmtGroups, "i", $_SESSION['admin_id']);
-mysqli_stmt_execute($stmtGroups);
-$groups = mysqli_stmt_get_result($stmtGroups)->fetch_all(MYSQLI_ASSOC);
+// Fetch group info
+$selectGroupQuery = "SELECT * FROM groups WHERE group_name = ? AND admin_id = ?";
+$stmtGroup = mysqli_prepare($conn, $selectGroupQuery);
+mysqli_stmt_bind_param($stmtGroup, "si", $groupName, $adminId);
+mysqli_stmt_execute($stmtGroup);
+$groupResult = mysqli_stmt_get_result($stmtGroup);
+$group = mysqli_fetch_all($groupResult, MYSQLI_ASSOC);
+mysqli_stmt_close($stmtGroup);
+$groupId = $group[0]['group_id'];
+
+
+
+// Fetch group members based on the selected group ID
+if ($groupId) {
+    $selectMembersQuery = "SELECT * FROM group_members WHERE group_id = ?";
+    $stmtMembers = mysqli_prepare($conn, $selectMembersQuery);
+    mysqli_stmt_bind_param($stmtMembers, "i", $groupId);
+    mysqli_stmt_execute($stmtMembers);
+    $membersResult = mysqli_stmt_get_result($stmtMembers);
+    $members = mysqli_fetch_all($membersResult, MYSQLI_ASSOC);
+    mysqli_stmt_close($stmtMembers);
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Your existing code for adding new members to the group
+    var_dump($groupId);
     $groupId = $_POST['group_id'];
-    $memberName = $_POST['member_name']; // No need for mysqli_real_escape_string
+    $groupName = $_POST['group_name'];
+    $adminId = $_POST['admin_id'];
+    $memberName = mysqli_real_escape_string($conn, $_POST['member_name']);
 
     $insertMemberQuery = "INSERT INTO group_members (group_id, member_name) VALUES (?, ?)";
     $stmtMember = mysqli_prepare($conn, $insertMemberQuery);
@@ -26,13 +51,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (mysqli_stmt_execute($stmtMember)) {
         mysqli_stmt_close($stmtMember);
-        header("Location: view_group.php?group_id=$groupId");
+        // Redirect to the "add members" page with the corresponding group ID
+        header("Location: add_members.php?group_name=$groupName&admin_id=$adminId");
         exit();
     } else {
         $error = 'Failed to add member. Please try again.';
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -44,12 +71,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Members to Group</title>
-
 </head>
 
 <body>
-    <header>
-        <!-- Include your navigation/header content here -->
+<header>
+        <nav>
+            <div class="logo">
+                <!-- Add your logo image or text here -->
+                <img src="css/images/logo.png" alt="Logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="individual_dashboard.php">Dashboard</a></li>
+                <li><a href="add_group_expense.php?group_id=<?php echo $groupId; ?>">Add Group Expense</a></li>
+                <li><a href="group_owe.php">How Much I Owe</a></li>
+                <li><a href="logout.php">Logout</a></li>
+            </ul>
+        </nav>
     </header>
 
     <div class="container">
@@ -59,23 +96,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p class="error-msg"><?php echo $error; ?></p>
             <?php endif; ?>
 
-            <form method="POST" action="add_members.php"> <!-- Corrected form action -->
-                <label for="group_id">Select Group:</label>
+            <!-- Display the list of members for the selected group -->
+            <?php if (!empty($members)) : ?>
+                <h2>Group Members:</h2>
+                <ul>
+                    <?php foreach ($members as $member) : ?>
+                        <li><?php echo $member['member_name']; ?></li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
+
+            <form method="POST" action="add_members.php">
+                <!-- <label for="group_id">Select Group:</label>
                 <select id="group_id" name="group_id" required>
                     <?php foreach ($groups as $group) : ?>
-                        <option value="<?php echo $group['group_id']; ?>"><?php echo $group['group_name']; ?></option>
+                        <option value="<?php echo $group['id']; ?>"><?php echo $group['group_name']; ?></option>
                     <?php endforeach; ?>
-                </select>
+                </select> -->
+                <input type='hidden' name='group_id' value='<?php echo "$groupId";?>'/>
+                <input type='hidden' name='group_name' value='<?php echo "$groupName";?>'/>
+                <input type='hidden' name='admin_id' value='<?php echo "$adminId";?>'/>
                 <label for="member_name">Member Name:</label>
                 <input type="text" id="member_name" name="member_name" required>
-                <input type="hidden" name="admin_id" value="<?php echo $_SESSION['admin_id']; ?>"> <!-- Add hidden input for admin_id -->
                 <button type="submit">Add Member</button>
             </form>
-
         </div>
     </div>
-
-
 </body>
 
 </html>

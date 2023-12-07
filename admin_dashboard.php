@@ -11,7 +11,7 @@ include 'config.php';
 // Fetch and display admin-specific information from user_form table
 $adminId = $_SESSION['admin_id']; // Assuming you store admin_id in the session
 
-$selectAdmin = "SELECT * FROM user_db.user_form WHERE ID = ?";
+$selectAdmin = "SELECT * FROM user_db.user_form WHERE user_id = ?";
 $stmtAdmin = mysqli_prepare($conn, $selectAdmin);
 mysqli_stmt_bind_param($stmtAdmin, "i", $adminId);
 mysqli_stmt_execute($stmtAdmin);
