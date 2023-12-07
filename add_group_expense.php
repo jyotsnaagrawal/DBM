@@ -102,9 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <ul class="nav-links">
                 <li><a href="individual_dashboard.php">Dashboard</a></li>
-                <li><a href="#">Add an Expense</a></li>
-                <li><a href="group_expenses.php">Group Expenses</a></li>
-                <li><a href="#">Settle Up</a></li>
+                <li><a href="group_owe.php">How Much I Owe</a></li>
                 <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>

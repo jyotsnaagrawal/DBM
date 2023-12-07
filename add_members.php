@@ -41,6 +41,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Your existing code for adding new members to the group
     var_dump($groupId);
     $groupId = $_POST['group_id'];
+    $groupName = $_POST['group_name'];
+    $adminId = $_POST['admin_id'];
     $memberName = mysqli_real_escape_string($conn, $_POST['member_name']);
 
     $insertMemberQuery = "INSERT INTO group_members (group_id, member_name) VALUES (?, ?)";
@@ -50,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (mysqli_stmt_execute($stmtMember)) {
         mysqli_stmt_close($stmtMember);
         // Redirect to the "add members" page with the corresponding group ID
-        header("Location: add_group_expense.php?group_id=$groupId");
+        header("Location: add_members.php?group_name=$groupName&admin_id=$adminId");
         exit();
     } else {
         $error = 'Failed to add member. Please try again.';
@@ -80,6 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             <ul class="nav-links">
                 <li><a href="individual_dashboard.php">Dashboard</a></li>
+                <li><a href="add_group_expense.php?group_id=<?php echo $groupId; ?>">Add Group Expense</a></li>
                 <li><a href="group_owe.php">How Much I Owe</a></li>
                 <li><a href="logout.php">Logout</a></li>
             </ul>
@@ -111,6 +114,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <?php endforeach; ?>
                 </select> -->
                 <input type='hidden' name='group_id' value='<?php echo "$groupId";?>'/>
+                <input type='hidden' name='group_name' value='<?php echo "$groupName";?>'/>
+                <input type='hidden' name='admin_id' value='<?php echo "$adminId";?>'/>
                 <label for="member_name">Member Name:</label>
                 <input type="text" id="member_name" name="member_name" required>
                 <button type="submit">Add Member</button>
