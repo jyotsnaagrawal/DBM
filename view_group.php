@@ -235,7 +235,19 @@ function calculateAmountOwed($userId, $groupId, $conn) {
 </head>
 
 <body>
-
+    <header>
+        <nav>
+            <div class="logo">
+                <!-- Add your logo image or text here -->
+                <img src="css/images/logo.png" alt="Logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="individual_dashboard.php">Dashboard</a></li>
+                <li><a href="group_owe.php">How Much I Owe</a></li>
+                <li><a href="logout.php">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
 
     <div class="container">
         <div class="content">

@@ -45,7 +45,13 @@ if (isset($_GET['group_id'])) {
     $members = mysqli_stmt_get_result($stmtMembers)->fetch_all(MYSQLI_ASSOC);
 
     // Fetch owed amounts
-    $selectOwesQuery = "SELECT er.owe_to, paid_for as owed_by, SUM(amount_owe) AS total_owed FROM `group_expenses` ge, expenses_relation er WHERE ge.group_id = ? AND ge.expense_id = er.expense_id GROUP BY er.owe_to, er.paid_for";
+    $selectOwesQuery = "SELECT owe_to_gm.member_name as owe_to, paid_for_gm.member_name as owed_by, SUM(amount_owe) AS total_owed 
+            FROM `group_expenses` ge, expenses_relation er, group_members owe_to_gm, group_members paid_for_gm 
+            WHERE ge.group_id = ?
+            AND ge.expense_id = er.expense_id 
+            AND owe_to_gm.id = er.owe_to
+            AND paid_for_gm.id = er.paid_for
+            GROUP BY er.owe_to, er.paid_for";
     $stmtOwes = mysqli_prepare($conn, $selectOwesQuery);
     mysqli_stmt_bind_param($stmtOwes, "i", $groupId);
     mysqli_stmt_execute($stmtOwes);
@@ -73,8 +79,18 @@ if (isset($_GET['group_id'])) {
 </head>
 
 <body>
-    <header>
-        <!-- Include your navigation/header content here -->
+<header>
+        <nav>
+            <div class="logo">
+                <!-- Add your logo image or text here -->
+                <img src="css/images/logo.png" alt="Logo">
+            </div>
+            <ul class="nav-links">
+                <li><a href="individual_dashboard.php">Dashboard</a></li>
+                <li><a href="group_owe.php">How Much I Owe</a></li>
+                <li><a href="logout.php">Logout</a></li>
+            </ul>
+        </nav>
     </header>
 
     <div class="container">
@@ -105,8 +121,8 @@ if (isset($_GET['group_id'])) {
                     <?php foreach ($owedAmounts as $paidBy => $oweToAmounts) : ?>
                         <?php foreach ($oweToAmounts as $oweTo => $amount) : ?>
                             <tr>
-                                <td><?php echo htmlspecialchars($members[$paidBy]['member_name']); ?></td>
-                                <td><?php echo htmlspecialchars($members[$oweTo]['member_name']); ?></td>
+                                <td><?php echo htmlspecialchars($owe['owe_to']); ?></td>
+                                <td><?php echo htmlspecialchars($owe['owed_by']); ?></td>
                                 <td><?php echo $amount; ?></td>
                             </tr>
                         <?php endforeach; ?>
