@@ -60,7 +60,7 @@ if (isset($_POST['submit'])) {
    <title>Register Form</title>
 
    <!-- Custom CSS file link  -->
-   <link rel="stylesheet" href="css/style.css">
+   <link rel="stylesheet" href="css/register_form.css">
 </head>
 <body>
 <header>

@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <ul class="nav-links">
                 <li><a href="individual_dashboard.php">Dashboard</a></li>
                 <li><a href="#">Add an Expense</a></li>
-                <li><a href="#">Settle Up</a></li>
+                
                 <li><a href="logout.php">Logout</a></li>
             </ul>
         </nav>

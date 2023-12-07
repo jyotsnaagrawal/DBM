@@ -122,7 +122,7 @@ $adminData = mysqli_stmt_get_result($stmtAdmin)->fetch_assoc();
          <ul class="nav-links">
             <li><a href="individual_dashboard.php">Dashboard</a></li>
             <li><a href="add_expense.php">Add an Expense</a></li>
-            <li><a href="#">Settle Up</a></li>
+            
             <li><a href="logout.php">Logout</a></li>
          </ul>
       </nav>

@@ -51,7 +51,7 @@ body {
 
 .container .content {
    text-align: right;
-   color: #d41e1e;
+   color: #421ed4;
    text-decoration: solid;
    animation: fadeInUp 1s ease-in-out;
    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -59,7 +59,7 @@ body {
 
 .container .content h3,
 .container .content h1 {
-   background: linear-gradient(to right, crimson, pink);
+   background: linear-gradient(to right, rgb(20, 20, 220), rgb(229, 224, 225));
    -webkit-background-clip: text;
    background-clip: text; /* Add this line for compatibility */
    color: transparent;
@@ -75,8 +75,8 @@ body {
 }
 
 .container .content h3 span {
-   background: crimson;
-   color: #fff;
+   background: rgb(231, 225, 226);
+   color: #221616;
    border-radius: 5px;
    padding: 0 15px;
 }
@@ -87,7 +87,7 @@ body {
 }
 
 .container .content h1 span {
-   color: crimson;
+   color: rgb(87, 20, 220);
 }
 
 .container .content p {
@@ -110,8 +110,8 @@ body {
 }
 
 .container .content .btn:hover {
-   background: crimson;
-   color: #fff;
+   background: rgb(222, 215, 217);
+   color: #171515;
    transform: scale(1.1);
 }
 
@@ -134,7 +134,7 @@ body {
    padding: 20px;
    border-radius: 10px;
    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-   background: #fff;
+   background: #eedfdf;
    text-align: center;
    width: 80%;
    max-width: 500px;
@@ -165,7 +165,7 @@ body {
 
 .form-container form .form-btn {
    background: #fbd0d9;
-   color: crimson;
+   color: rgb(16, 10, 11);
    text-transform: capitalize;
    font-size: 20px;
    cursor: pointer;
@@ -176,8 +176,8 @@ body {
 }
 
 .form-container form .form-btn:hover {
-   background: crimson;
-   color: #fff;
+   background: rgb(239, 236, 237);
+   color: #171010;
 }
 
 .form-container form p {
@@ -187,14 +187,14 @@ body {
 }
 
 .form-container form p a {
-   color: crimson;
+   color: rgb(16, 11, 12);
 }
 
 .form-container form .error-msg {
    margin: 10px 0;
    display: block;
-   background: crimson;
-   color: #fff;
+   background: rgb(227, 223, 224);
+   color: #070707;
    border-radius: 5px;
    font-size: 20px;
    padding: 10px;
